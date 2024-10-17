@@ -260,7 +260,17 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
             mainContour = self.plotWidget.isoCurve_level(level=threshold)
             # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
-            self.parameters = pd_anal.optimize_profile(mainContour, px_per_mm=px_per_mm, parameters_initialguess=self.parameters)
+            to_fit=[self.anglegCheckBox.isChecked(),
+                    self.tipyCheckBox.isChecked(),
+                    self.tipxCheckBox.isChecked(),
+                    self.r0CheckBox.isChecked(),
+                    self.caplengthCheckBox.isChecked()]
+
+            print('DEBUG:', f'To fit: {to_fit}')
+
+
+            self.parameters = pd_anal.optimize_profile(mainContour, px_per_mm=px_per_mm,
+                                                       parameters_initialguess=self.parameters, to_fit=to_fit)
 
             pd_anal.talk_params(self.parameters, px_per_mm=px_per_mm)
 

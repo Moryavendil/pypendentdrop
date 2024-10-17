@@ -394,24 +394,31 @@ def compare_profiles(fitparams:Fitparams, contour, px_per_mm:float) -> float:
 
 # compute the optimal profile
 
-def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialguess:Fitparams, maxiter:Optional[int]=None, method:Optional[str]=None) -> Fitparams:
+def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialguess:Fitparams,
+                     to_fit:Optional[List[bool]]=None,
+                     maxiter:Optional[int]=None, method:Optional[str]=None) -> Fitparams:
     """
 
+    :param contour:
+    :param px_per_mm:
     :param parameters_initialguess:
-    :param xcontour:
-    :param ycontour:
+    :param to_fit: True if the parameter is to be fitted, False if it is to be fixed
     :param maxiter:
     :param method: 'Nelder-Mead' (faster) or 'Powell' (pendent-drop like)
     :return:
     """
     if method is None:
         method = 'Nelder-Mead'
+    if to_fit is None:
+        to_fit = [True, True, True, True, True]
 
-    bnds = [(None, None),  # gravity_angle
-            (None, None),  # y_tip_position
-            (None, None),  # x_tip_position
-            (0, None),  # r0_mm
-            (0, None)]  # capillary_length_mm
+    default_bounds = [(None, None),  # gravity_angle
+                      (None, None),  # y_tip_position
+                      (None, None),  # x_tip_position
+                      (0, None),  # r0_mm
+                      (0, None)] # capillary length (mm)
+
+    bounds = [default_bounds[i] if to_fit[i] else (parameters_initialguess[i], parameters_initialguess[i]) for i in range(len(parameters_initialguess))]
 
     # we remove the top 5 pixels, i.e. the points too close to the top edge
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = parameters_initialguess
@@ -427,8 +434,8 @@ def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialgues
     # for method = Nelder-Mead, options={'adaptive':False, 'disp':False}
 
     t1 = time.time()
-    minimization = minimize(compare_profiles, x0=np.array(parameters_initialguess), args=(contour_opti, px_per_mm), bounds=bnds,
-                            method='Nelder-Mead', options=options)
+    minimization = minimize(compare_profiles, x0=np.array(parameters_initialguess), args=(contour_opti, px_per_mm),
+                            bounds=bounds, method='Nelder-Mead', options=options)
     t2 = time.time()
 
     print('DEBUG:', f'OPTIMIZATION TIME: {int((t2-t1)*1000)} ms')

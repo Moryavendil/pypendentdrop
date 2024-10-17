@@ -1,5 +1,5 @@
 URGENT
-otsu threshold
+otsu threshold for auto threshold
 
 COSMETICOOL
 isoline en rouge pour les petits contours, en vert pour le plus grand
