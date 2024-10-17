@@ -12,6 +12,14 @@ Roi = Optional[List[Optional[int]]]
 
 # import image and threshold
 def import_image(filePath:Optional[str] = None) -> Tuple[bool, np.ndarray]:
+    """
+    Imports an image from a path.
+    Returns True and the image in gray scale if the image can be imported.
+    Returns False and a random matrix if the import failed.
+
+    :param filePath:
+    :return:
+    """
     if filePath is None:
         data = np.random.randint(0, 255, (128, 128))
         success = False
@@ -23,7 +31,16 @@ def import_image(filePath:Optional[str] = None) -> Tuple[bool, np.ndarray]:
         success = True
     return success, data
 
-def contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None):
+def find_contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> List[np.ndarray]:
+    """
+    Gets a collection of lines that each a contour of the level **level** of the data.
+    Each line is in line form, i.e. shape=(N,2)
+
+    :param data:
+    :param level:
+    :param roi:
+    :return:
+    """
     if roi is None:
         roi = [0, 0, None, None] # TLx, TLy, BRx, BRy
     if (roi[0] is not None) and (roi[0] < 0):
@@ -34,7 +51,7 @@ def contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None):
         roi[2] = None
     if (roi[3] is not None) and (roi[3] > data.shape[0]):
         roi[3] = None
-    print('DEBUG: Generating contour lines')
+    # print('DEBUG: Generating contour lines')
 
     cont_gen = contour_generator(z=data[roi[1]:roi[3], roi[0]:roi[2]], line_type=LineType.Separate) # quad_as_tri=True
 
@@ -45,8 +62,29 @@ def contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None):
 
     return lines
 
+def find_mainContour(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> np.ndarray:
+    """
+    Returns the longest lines from find_contourLines in a contour-form: shape=(2, N)
+
+    :param data:
+    :param level:
+    :param roi:
+    :return:
+    """
+    lines = find_contourLines(data, level, roi=roi)
+
+    return np.array(lines[np.argmax([len(line) for line in lines])]).T
+
+
 # paremeters
-def talk_params(fitparams, px_per_mm):
+def talk_params(fitparams:Fitparams, px_per_mm:float) -> None:
+    """
+    Mainly a debug function, this displays the value of the parameters in a human readable form in the console.
+
+    :param fitparams:
+    :param px_per_mm:
+    :return:
+    """
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
     print('Current parameters:')
     print('\tpx_per_mm:', round(px_per_mm, 2), 'px/mm')
@@ -56,13 +94,19 @@ def talk_params(fitparams, px_per_mm):
     print('\tr0:', round(r0_mm ,3), 'mm (=', round(r0_mm*px_per_mm, 1), 'px)')
     print('\tcapillary_length:', round(capillary_length_mm, 3), 'mm')
 
-def image_centre(image) -> np.ndarray:
+def image_centre(image:np.ndarray) -> np.ndarray:
+    """
+    Returns the (x, y) coordinates of the center of an image (around which it is pertinent to rotate the contour).
+
+    :param image:
+    :return:
+    """
     return np.array(image.shape[1::-1]) / 2
 
 def getrotationandscalematrix(centre, angle:float=0., scalefactor:float=1.):
     """
-    dkfjkdfkdjf
-
+    Gets the matrix allowing the rotation and scaling of a contour (or an image) around a point.
+    Shamelessly inspired from OpenCV's cv2.getRotationMatrix2D.
 
     :param centre:
     :param angle:
@@ -75,6 +119,15 @@ def getrotationandscalematrix(centre, angle:float=0., scalefactor:float=1.):
                      [-s, c, s*centre[0] + (1-c)*centre[1]]])
 
 def rotate_and_scale(contour, angle:float=0., centre:Optional[Union[Tuple, List, np.ndarray]]=None, scalefactor=1.):
+    """
+    Rotates and/or scales a contour around a center **centre**.
+
+    :param contour:
+    :param angle:
+    :param centre:
+    :param scalefactor:
+    :return:
+    """
     if centre is None: # centre of rotation
         centre = (0, 0)
     rot_mat = getrotationandscalematrix(centre, angle=angle, scalefactor=scalefactor)
@@ -84,7 +137,15 @@ def rotate_and_scale(contour, angle:float=0., centre:Optional[Union[Tuple, List,
     y_rotated = rot_mat[1,0] * contour[0] + rot_mat[1, 1] * contour[1] + rot_mat[1, 2]
     return x_rotated, y_rotated
 
-def make_initial_estimation(image_centre, contour:np.ndarray, px_per_mm) -> Fitparams:
+def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Fitparams:
+    """
+    Estimates the parameters crudely using (hopefully) robust techniques.
+
+    :param image_centre:
+    :param contour:
+    :param px_per_mm:
+    :return:
+    """
     ### INITIAL ESTIMATION OF THE PARAMETERS
 
     ### ANGLE OF GRAVITY
@@ -112,13 +173,6 @@ def make_initial_estimation(image_centre, contour:np.ndarray, px_per_mm) -> Fitp
             print(f'WARN: the angle of gravity was detected to {round(gravity_angle*180/np.pi, 2)} deg.')
             print(f'WARN: This is likely an error so I put it to 0.')
             gravity_angle = 0
-        # OLD CV2 WAY
-        # contour = np.empty([len(xcontour), 1, 2], dtype=int)
-        # contour[:, 0, 0] = np.rint(xcontour).astype(int)
-        # contour[:, 0, 1] = np.rint(ycontour).astype(int
-        # (vx_lf, vy_lf, x_lf, y_lf) = cv2.fitLine(contour, cv2.DIST_L2,0,0.01,0.01)
-        # gravity_angle = (np.arctan2(vy_lf, vx_lf)[0])%(np.pi) - np.pi/2
-        # gravity_angle = -gravity_angle
     except:
         print("WARN: couldn't get gravity angle. Falling back to", gravity_angle)
 
@@ -180,9 +234,9 @@ def deriv(s_, rpkz):
     oneoverr = 1/rpkz[0]
     return [c, rpkz[2], -s + c * (s*oneoverr - rpkz[2])*oneoverr, s]
 
-def greater_possible_zMax(tipRadius):
+def greater_possible_zMax(tipRadius:float) -> float:
     """
-    The max value zmax can take, from Daerr, pendent drop (we checked that it works)
+    The max value zmax can take, from Daerr, pendent drop.
 
     :param tipRadius:
     :return:
@@ -205,7 +259,7 @@ def compute_nondimensional_profile(tipRadius:float, ds:float = 1e-3, approxLimit
     It defines the fraction of capillary length or tip radius (whichever is smaller) up to which we use the approximate solution.
     Following pendent drop, we take it equal to 0.2
 
-    About the solver : by default, it is LSODA form LAPACK (scipy.integrate's odeint). We can use RK45 but it's slower.
+    About the solver : We use LSODA form LAPACK (scipy.integrate's odeint). Good ol' Fortran never dissapoints.
 
     :param tipRadius: The dimensionless tip radius r_0/l_c
     :param ds:
@@ -260,7 +314,7 @@ def compute_nondimensional_profile(tipRadius:float, ds:float = 1e-3, approxLimit
 
 def integrated_contour(px_per_mm:float, fitparams:Fitparams) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Gives the computed profile in pixel coordinates
+    Gives the computed profile in pixel coordinates.
 
     :param px_per_mm:
     :param fitparams:
@@ -297,7 +351,7 @@ def integrated_contour(px_per_mm:float, fitparams:Fitparams) -> Tuple[np.ndarray
 #compare computed profile to real profile
 from scipy.integrate import trapezoid
 
-def compare_profiles(fitparams:Fitparams, contour, px_per_mm) -> float:
+def compare_profiles(fitparams:Fitparams, contour, px_per_mm:float) -> float:
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
 
     tipRadius = r0_mm / capillary_length_mm
@@ -340,10 +394,10 @@ def compare_profiles(fitparams:Fitparams, contour, px_per_mm) -> float:
 
 # compute the optimal profile
 
-def optimize_profile(fitparams_initial:Fitparams, contour, px_per_mm, maxiter=None, method=None) -> Fitparams:
+def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialguess:Fitparams, maxiter:Optional[int]=None, method:Optional[str]=None) -> Fitparams:
     """
 
-    :param fitparams_initial:
+    :param parameters_initialguess:
     :param xcontour:
     :param ycontour:
     :param maxiter:
@@ -360,7 +414,7 @@ def optimize_profile(fitparams_initial:Fitparams, contour, px_per_mm, maxiter=No
             (0, None)]  # capillary_length_mm
 
     # we remove the top 5 pixels, i.e. the points too close to the top edge
-    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams_initial
+    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = parameters_initialguess
     nottooclosefromthetop = contour[1]-contour[1].min() > 5/np.cos(gravity_angle)
     contour_opti = contour[:, nottooclosefromthetop]
 
@@ -373,7 +427,7 @@ def optimize_profile(fitparams_initial:Fitparams, contour, px_per_mm, maxiter=No
     # for method = Nelder-Mead, options={'adaptive':False, 'disp':False}
 
     t1 = time.time()
-    minimization = minimize(compare_profiles, x0=np.array(fitparams_initial), args=(contour_opti, px_per_mm), bounds=bnds,
+    minimization = minimize(compare_profiles, x0=np.array(parameters_initialguess), args=(contour_opti, px_per_mm), bounds=bnds,
                             method='Nelder-Mead', options=options)
     t2 = time.time()
 
@@ -496,7 +550,7 @@ def optimize_profile(fitparams_initial:Fitparams, contour, px_per_mm, maxiter=No
 #
 #     print(f'Threshold level: {level}')
 #
-#     lines = contourLines(img, level)
+#     lines = find_contourLines(img, level)
 #     linelengths = [len(line) for line in lines]
 #
 #     print(f'Number of lines: {len(lines)}, lengths: {linelengths}')
@@ -505,7 +559,7 @@ def optimize_profile(fitparams_initial:Fitparams, contour, px_per_mm, maxiter=No
 #
 #     print(f'Drop contour: {len(cnt)} points')
 #
-#     init_params = make_initial_estimation(img, cnt, px_per_mm)
+#     init_params = estimate_parameters(img, cnt, px_per_mm)
 #
 #     print(f'Initial (guessed) parameters:')
 #     talk_params(init_params, px_per_mm=px_per_mm)

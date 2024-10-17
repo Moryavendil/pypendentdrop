@@ -43,7 +43,6 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
         self.autoThresholdCheckBox.toggled.connect(self.plotWidget.set_manualIsoCurve_immobile)
 
-
         ### RIGHT SIDE
 
         ### IMAGE AND THRESHOLD TAB
@@ -57,7 +56,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         self.SmoothingDistanceLabel.setVisible(False)
         self.smoothingDistanceSpinBox.setVisible(False)
 
-        ### MEASURMENT TAB
+        ### MEASUREMENT TAB
         ## GUESS + FIT
         self.analysisTabs.setTabEnabled(1, False)
         self.pixelDensitySpinBox.editingFinished.connect(self.harmonizePixelSize)
@@ -95,7 +94,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
                 self.displayStackedWidget.setCurrentIndex(1)
                 self.analysisTabs.setTabEnabled(1, True)
 
-    ### IMAGE METHODS
+    ### WORK ON IMAGE
 
     def ROIMoved(self):
         ROIpos = self.plotWidget.roi.pos()
@@ -137,7 +136,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         
         self.plotWidget.iso.setLevel(level)
 
-    ### ANALYSIS METHODS
+    ### ESTIMATE PARAMETERS
 
     def harmonizePixelDensity(self, pixelSize:Optional[float]=None):
         if pixelSize is None:
@@ -225,28 +224,23 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
     def guessParameters(self):
         px_per_mm = self.pixelDensitySpinBox.value()
-        print('DBG GUESS PARAMETERS')
+        # print('DEBUG GUESS PARAMETERS')
         threshold = self.customThresholdSpinBox.value()
 
-        bigline = self.plotWidget.isoCurve_level(level=threshold).T
-        print('DBG:', f'Contour shape: {bigline.shape} (expect (2, N))')
+        mainContour = self.plotWidget.isoCurve_level(level=threshold)
+        # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
-        image = np.array(self.plotWidget.iso.data)
+        image_centre = pd_anal.image_centre(np.array(self.plotWidget.iso.data))
+        # print('DEBUG:', f'image centre (rotation centre): {image_centre}')
 
-        print('DBG:', f'Data shape: {image.shape} (expect (M, K))')
-
-        # bigline += np.expand_dims(np.array(self.imgShowWidget.iso.roi[:2]), 1)
-        image_centre = pd_anal.image_centre(image)
-
-        print('DBG:', f'image centre (rotation centre): {image_centre}')
-
-        self.parameters = pd_anal.make_initial_estimation(image_centre, bigline, px_per_mm=px_per_mm)
+        self.parameters = pd_anal.estimate_parameters(image_centre, mainContour, px_per_mm=px_per_mm)
 
         pd_anal.talk_params(self.parameters, px_per_mm=px_per_mm)
 
         self.applyParameters()
 
-    # Optimization
+    ### OPTIMIZE PARAMETERS
+
     def areParametersValid(self) -> bool:
         " Coucou "
         canDoOptimization = not( (self.pixelDensitySpinBox.value() == 0) or np.prod(np.array(self.parameters[3:])==0) )
@@ -257,23 +251,16 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
             self.bondSpinBox.setValue(0)
         return canDoOptimization
 
-
     def optimizeParameters(self):
         if self.areParametersValid():
 
             px_per_mm = self.pixelDensitySpinBox.value()
-            print('DBG GUESS PARAMETERS')
+            # print('DEBUG OPTIMIZE PARAMETERS')
             threshold = self.customThresholdSpinBox.value()
-            bigline = self.plotWidget.isoCurve_level(level=threshold).T
-            print('DBG:', f'Contour shape: {bigline.shape} (expect (2, N))')
+            mainContour = self.plotWidget.isoCurve_level(level=threshold)
+            # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
-            image = np.array(self.plotWidget.iso.data)
-
-            print('DBG:', f'Data shape: {image.shape} (expect (M, K))')
-
-            # bigline += np.expand_dims(self.imgShowWidget.iso.offset, 1)
-
-            self.parameters = pd_anal.optimize_profile(self.parameters, bigline, px_per_mm=px_per_mm)
+            self.parameters = pd_anal.optimize_profile(mainContour, px_per_mm=px_per_mm, parameters_initialguess=self.parameters)
 
             pd_anal.talk_params(self.parameters, px_per_mm=px_per_mm)
 
@@ -286,7 +273,8 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             self.plotWidget.plot_computed_profile(R, Z)
 
-    #
+    ### PHYSICS
+
     def actualizeSurfaceTension(self):
         if self.areParametersValid():
             r0_mm = self.parameters[3]
