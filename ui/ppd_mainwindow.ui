@@ -1,0 +1,999 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PPD_MainWindow</class>
+ <widget class="QMainWindow" name="PPD_MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1619</width>
+    <height>894</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QStackedWidget" name="displayStackedWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <widget class="QWidget" name="display_welcomePage">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <property name="spacing">
+         <number>6</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="welcomeIcon">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>1</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Py Pendent Drop</string>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="analysisTabs">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab_imagecontour">
+       <attribute name="title">
+        <string>Drop shape characterization</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="imageSelectionGroupBox">
+          <property name="title">
+           <string>Image selection</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <property name="formAlignment">
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="imageFileLabel">
+             <property name="text">
+              <string>Image file</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <layout class="QHBoxLayout" name="imageFileHLayout">
+             <item>
+              <widget class="QLineEdit" name="imageFileLineEdit"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="imageFileBrowsePushButton">
+               <property name="text">
+                <string>Browse</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="subregionLabel">
+             <property name="text">
+              <string>Subregion of interest</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <layout class="QGridLayout" name="subregionGridLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="descr1ROITL">
+               <property name="text">
+                <string>TL corner: (</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="ROI_TL_x_spinBox">
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="maximum">
+                <number>9999</number>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QSpinBox" name="ROI_TL_y_spinBox">
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="maximum">
+                <number>99999</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QSpinBox" name="ROI_BR_y_spinBox">
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="maximum">
+                <number>99999</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="ROI_BR_x_spinBox">
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="maximum">
+                <number>9999</number>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="descr2ROITL">
+               <property name="text">
+                <string>, </string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QLabel" name="descr3ROITL">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="descr1ROIBR">
+               <property name="text">
+                <string>BR corner: (</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="descr2ROIBR">
+               <property name="text">
+                <string>, </string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QLabel" name="descr3ROIBR">
+               <property name="text">
+                <string>)</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="contourGroupBox">
+          <property name="title">
+           <string>Drop contour detection</string>
+          </property>
+          <layout class="QFormLayout" name="formLayout_2">
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="autoThresholdCheckBox">
+             <property name="toolTip">
+              <string>Choose automatically the binarization threshold, using Otsu' s method.</string>
+             </property>
+             <property name="text">
+              <string>Auto threshold</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <layout class="QHBoxLayout" name="thresholdHLayout">
+             <item>
+              <widget class="QLabel" name="customThresholdLabel">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>The binarization threshold.</string>
+               </property>
+               <property name="text">
+                <string>Threshold</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="customThresholdSpinBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <number>255</number>
+               </property>
+               <property name="value">
+                <number>127</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="subpixelCheckBox">
+             <property name="toolTip">
+              <string>Subpixel edge extraction, adapted from R. Ngiam.</string>
+             </property>
+             <property name="text">
+              <string>Use subpixel refinement</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QCheckBox" name="smoothingCheckBox">
+             <property name="toolTip">
+              <string>Smooth the obtained profile to remove nonphysical high frequency spikes.</string>
+             </property>
+             <property name="text">
+              <string>Smooth profile</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <layout class="QHBoxLayout" name="smoothingHLayout">
+             <item>
+              <widget class="QLabel" name="SmoothingDistanceLabel">
+               <property name="toolTip">
+                <string>The typical distance of which the contour is smoothed.</string>
+               </property>
+               <property name="text">
+                <string>Smoothing distance</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="smoothingDistanceSpinBox">
+               <property name="suffix">
+                <string> px</string>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>999</number>
+               </property>
+               <property name="singleStep">
+                <number>2</number>
+               </property>
+               <property name="value">
+                <number>11</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_measure">
+       <attribute name="title">
+        <string>Measurement</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QGroupBox" name="parametersGroupBox">
+          <property name="title">
+           <string>Parameters finding</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="1" column="0">
+              <widget class="QLabel" name="pixelSizeLabel">
+               <property name="text">
+                <string>Pixel spacing</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="pixelSizeSpinbox">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string>Click to provide pixel spacing (in mm)</string>
+               </property>
+               <property name="suffix">
+                <string> mm/px</string>
+               </property>
+               <property name="decimals">
+                <number>5</number>
+               </property>
+               <property name="maximum">
+                <double>99999.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="pixelDensityLabel">
+               <property name="text">
+                <string>Pixel density</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="pixelDensitySpinBox">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string>Click to provide pixel density (in mm⁻¹) </string>
+               </property>
+               <property name="suffix">
+                <string> px/mm</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>999999.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="parametersLine">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="parametersSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="autoGuessPushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Auto-guess parameters</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="parametersGridLayout">
+             <item row="4" column="0">
+              <widget class="QLabel" name="caplengthLabel">
+               <property name="text">
+                <string>Capillary length</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QCheckBox" name="tipxCheckBox">
+               <property name="text">
+                <string>Fit this parameter</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="tipxLabel">
+               <property name="text">
+                <string>Tip x position</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="anglegSpinBox">
+               <property name="specialValueText">
+                <string>-</string>
+               </property>
+               <property name="suffix">
+                <string> deg</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-180.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>180.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.500000000000000</double>
+               </property>
+               <property name="value">
+                <double>-180.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="tipyLabel">
+               <property name="text">
+                <string>Tip y position</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="anglegCheckBox">
+               <property name="text">
+                <string>Fit this parameter</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="tipxSpinBox">
+               <property name="specialValueText">
+                <string>-</string>
+               </property>
+               <property name="suffix">
+                <string> px</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>99999.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="tipySpinBox">
+               <property name="specialValueText">
+                <string>-</string>
+               </property>
+               <property name="suffix">
+                <string> px</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>99999.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="anglegLabel">
+               <property name="text">
+                <string>Angle of gravity</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QCheckBox" name="tipyCheckBox">
+               <property name="text">
+                <string>Fit this parameter</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="r0Label">
+               <property name="text">
+                <string>Drop tip radius</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="r0SpinBox">
+               <property name="specialValueText">
+                <string>-</string>
+               </property>
+               <property name="suffix">
+                <string> mm</string>
+               </property>
+               <property name="decimals">
+                <number>5</number>
+               </property>
+               <property name="maximum">
+                <double>99999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QDoubleSpinBox" name="caplengthSpinBox">
+               <property name="specialValueText">
+                <string>-</string>
+               </property>
+               <property name="suffix">
+                <string> mm</string>
+               </property>
+               <property name="decimals">
+                <number>5</number>
+               </property>
+               <property name="maximum">
+                <double>99999.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QCheckBox" name="r0CheckBox">
+               <property name="text">
+                <string>Fit this parameter</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="2">
+              <widget class="QCheckBox" name="caplengthCheckBox">
+               <property name="text">
+                <string>Fit this parameter</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="optimizePushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Optimize (fit the checked parameters)</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="physicsGroupBox">
+          <property name="title">
+           <string>Physical variables</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <layout class="QHBoxLayout" name="rhogHLayout">
+             <item>
+              <widget class="QLabel" name="rhogLabel">
+               <property name="text">
+                <string>density x gravity (g x Delta rho)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="rhogSpinBox">
+               <property name="baseSize">
+                <size>
+                 <width>200</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="readOnly">
+                <bool>false</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>99999.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>9.805999999999999</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="measureLine">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="measureSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>139</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QFormLayout" name="variablesFormLayout">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
+             </property>
+             <property name="labelAlignment">
+              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="formAlignment">
+              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="gammaLabel">
+               <property name="text">
+                <string>Surface tension gamma</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="gammaSpinBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="baseSize">
+                <size>
+                 <width>200</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string>-</string>
+               </property>
+               <property name="suffix">
+                <string> mN/m</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>99999.990000000005239</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="bondLabel">
+               <property name="text">
+                <string>Bond number</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="bondSpinBox">
+               <property name="baseSize">
+                <size>
+                 <width>200</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string>-</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>99999.990000000005239</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <layout class="QFormLayout" name="formLayout_4">
+             <item row="3" column="0">
+              <widget class="QLabel" name="worthingtonLabel">
+               <property name="text">
+                <string>Worthington number</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QDoubleSpinBox" name="worthingtonSpinBox">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string>Not implemented yet</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>99999.990000000005239</double>
+               </property>
+               <property name="value">
+                <double>0.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="dropVolumeLabel">
+               <property name="text">
+                <string>Drop volume</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="dropVolumeSpinBox">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string>Not implemented yet</string>
+               </property>
+               <property name="suffix">
+                <string> mm³</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="needleDiameterSpinBox">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="specialValueText">
+                <string>Not implemented yet</string>
+               </property>
+               <property name="suffix">
+                <string> mm</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="needleDiameterLabel">
+               <property name="text">
+                <string>Needle diameter</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1619</width>
+     <height>23</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>autoThresholdCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>customThresholdLabel</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>693</x>
+     <y>329</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>862</x>
+     <y>332</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>smoothingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>smoothingDistanceSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>693</x>
+     <y>580</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>975</x>
+     <y>583</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>smoothingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>SmoothingDistanceLabel</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>693</x>
+     <y>580</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>874</x>
+     <y>583</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoThresholdCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>customThresholdSpinBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>693</x>
+     <y>329</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>962</x>
+     <y>332</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
