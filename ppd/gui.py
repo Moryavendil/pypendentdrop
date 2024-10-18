@@ -268,8 +268,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             print('DEBUG:', f'To fit: {to_fit}')
 
-
-            self.parameters = pd_anal.optimize_profile(mainContour, px_per_mm=px_per_mm,
+            opti_success, self.parameters = pd_anal.optimize_profile(mainContour, px_per_mm=px_per_mm,
                                                        parameters_initialguess=self.parameters, to_fit=to_fit)
 
             pd_anal.talk_params(self.parameters, px_per_mm=px_per_mm)

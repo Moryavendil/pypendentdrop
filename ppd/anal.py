@@ -453,7 +453,7 @@ def compare_profiles(fitparams:Fitparams, contour, px_per_mm:float) -> float:
 
 def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialguess:Fitparams,
                      to_fit:Optional[List[bool]]=None,
-                     maxiter:Optional[int]=None, method:Optional[str]=None) -> Fitparams:
+                     maxiter:Optional[int]=None, method:Optional[str]=None) -> Tuple[bool, Fitparams]:
     """
 
     :param contour:
@@ -494,14 +494,16 @@ def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialgues
     minimization = minimize(compare_profiles, x0=np.array(parameters_initialguess), args=(contour_opti, px_per_mm),
                             bounds=bounds, method='Nelder-Mead', options=options)
     t2 = time.time()
-
     debug(f'Optimisation time: {int((t2-t1)*1000)} ms')
 
-    if minimization.success:
-        debug(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
-        trace(f'Minimization message: {minimization.message}')
-        return minimization.x
-    else:
-        error(f'Minimization unsuccessful: {minimization.message}')
+    optimization_success = minimization.success
 
-    return parameters_initialguess
+    if not(minimization.success):
+        info('Minimizaton failed')
+        debug(f'Minimization unsuccessful: {minimization.message}')
+        return False, parameters_initialguess
+
+    debug(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
+    trace(f'Minimization message: {minimization.message}')
+
+    return True, minimization.x

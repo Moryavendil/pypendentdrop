@@ -68,9 +68,9 @@ if __name__ == "__main__":
 
     debug(f'Pixel density provided: {px_per_mm} px/mm')
 
-    success, img = anal.import_image(imagefile)
+    import_success, img = anal.import_image(imagefile)
 
-    if success:
+    if import_success:
         debug(f'Import image successful.')
     else:
         error(f'Could not retreive the image at {imagefile}')
@@ -117,11 +117,14 @@ if __name__ == "__main__":
 
     debug(f'to_fit: {to_fit}')
 
-    opti_params = anal.optimize_profile(cnt, px_per_mm=px_per_mm, parameters_initialguess=init_params, to_fit=to_fit)
+    opti_success, opti_params = anal.optimize_profile(cnt, px_per_mm=px_per_mm, parameters_initialguess=init_params, to_fit=to_fit)
 
-    anal.talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
+    if opti_success:
+        anal.talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
 
-    debug(f'chi2: {anal.compare_profiles(opti_params, cnt, px_per_mm=px_per_mm)}')
+        debug(f'chi2: {anal.compare_profiles(opti_params, cnt, px_per_mm=px_per_mm)}')
+    else:
+        warning('Optimization failed :( Falling back to the estimated parameters.')
 
     r0_mm = opti_params[3]
     caplength_mm = opti_params[4]
@@ -143,8 +146,8 @@ if __name__ == "__main__":
 
         plotresults.generate_figure(img, cnt, px_per_mm, init_params,
                                     prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf')
-
-        plotresults.generate_figure(img, cnt, px_per_mm, opti_params,
-                                    prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf')
+        if opti_success:
+            plotresults.generate_figure(img, cnt, px_per_mm, opti_params,
+                                        prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf')
 
     sys.exit(0)
