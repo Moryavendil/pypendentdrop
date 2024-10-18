@@ -131,7 +131,7 @@ def find_mainContour(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> 
 
 
 # paremeters
-def talk_params(fitparams:Fitparams, px_per_mm:float, talkfn=trace, name=None) -> None:
+def talk_params(fitparams:Fitparams, px_per_mm:float, talkfn=print, name=None) -> None:
     """
     Mainly a debug function, this displays the value of the parameters in a human readable form in the console.
 

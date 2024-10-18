@@ -37,3 +37,4 @@ def trace(text:str):
     global verbose
     if verbose > 2:
         print(f'\t\t{bcolors.OKBLUE}TRACE:{bcolors.ENDC} {text}')
+
