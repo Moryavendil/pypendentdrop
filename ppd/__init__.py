@@ -1,3 +1,5 @@
+from typing import Tuple, Union, Optional, Dict, Any, List
+import numpy as np
 
 verbose = 0
 class bcolors:
@@ -38,3 +40,10 @@ def trace(text:str):
     if verbose > 2:
         print(f'\t\t{bcolors.OKBLUE}TRACE:{bcolors.ENDC} {text}')
 
+Fitparams = List[float]
+Roi = Optional[List[Optional[int]]]
+
+###### ANALYZE
+from .analyze import import_image, best_threshold, format_roi, find_contourLines, find_mainContour, talk_params, \
+    image_centre, getrotationandscalematrix, rotate_and_scale, estimate_parameters, greater_possible_zMax, \
+    compute_nondimensional_profile, integrated_contour, compare_profiles, optimize_profile

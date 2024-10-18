@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QMainWindow, QFileDialog
 from .ppd_mainwindow import Ui_PPD_MainWindow
 from .ppd_plotwidget import ppd_plotWidget
 
-from . import analyze as pd_anal
+from . import analyze
 
 
 RAD_PER_DEG = np.pi/180
@@ -230,12 +230,12 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         mainContour = self.plotWidget.isoCurve_level(level=threshold)
         # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
-        image_centre = pd_anal.image_centre(np.array(self.plotWidget.iso.data))
+        image_centre = analyze.image_centre(np.array(self.plotWidget.iso.data))
         # print('DEBUG:', f'image centre (rotation centre): {image_centre}')
 
-        self.parameters = pd_anal.estimate_parameters(image_centre, mainContour, px_per_mm=px_per_mm)
+        self.parameters = analyze.estimate_parameters(image_centre, mainContour, px_per_mm=px_per_mm)
 
-        pd_anal.talk_params(self.parameters, px_per_mm=px_per_mm)
+        analyze.talk_params(self.parameters, px_per_mm=px_per_mm)
 
         self.applyParameters()
 
@@ -268,17 +268,17 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             print('DEBUG:', f'To fit: {to_fit}')
 
-            opti_success, self.parameters = pd_anal.optimize_profile(mainContour, px_per_mm=px_per_mm,
+            opti_success, self.parameters = analyze.optimize_profile(mainContour, px_per_mm=px_per_mm,
                                                        parameters_initialguess=self.parameters, to_fit=to_fit)
 
-            pd_anal.talk_params(self.parameters, px_per_mm=px_per_mm)
+            analyze.talk_params(self.parameters, px_per_mm=px_per_mm)
 
             self.applyParameters()
 
     def actualizeComputedCurve(self):
         if self.areParametersValid():
             px_per_mm = self.pixelDensitySpinBox.value()
-            R, Z = pd_anal.integrated_contour(px_per_mm, self.parameters)
+            R, Z = analyze.integrated_contour(px_per_mm, self.parameters)
 
             self.plotWidget.plot_computed_profile(R, Z)
 

@@ -57,22 +57,22 @@ will launch the GUI version.
 ### Play with the library
 If you wish to write your own Python scripts using the PyPendentDrop library, here is a minimal example script
 
-	from ppd import analyze
+	import ppd
 	
 	filepath = './assets/test_data/water_dsc1884.tif'
 	pxldensity = 57.0
 	rhog = 9.812
 	roi = [10, 90, 300, 335]
 	
-	success, img = analyze.import_image(filepath)
+	success, img = ppd.import_image(filepath)
 	
-	threshold = analyze.best_threshold(img, roi=roi)
+	threshold = ppd.best_threshold(img, roi=roi)
 	
-	cnt = analyze.find_mainContour(img, threshold, roi=roi)
+	cnt = ppd.find_mainContour(img, threshold, roi=roi)
 	
-	estimated_parameters = analyze.estimate_parameters(anal.image_centre(img), cnt, pxldensity)
+	estimated_parameters = ppd.estimate_parameters(ppd.image_centre(img), cnt, pxldensity)
 	
-	optimized_parameters = analyze.optimize_profile(cnt, px_per_mm=pxldensity, parameters_initialguess=estimated_parameters)
+	opti_success, optimized_parameters = ppd.optimize_profile(cnt, px_per_mm=pxldensity, parameters_initialguess=estimated_parameters)
 	
 	gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = optimized_parameters
 	

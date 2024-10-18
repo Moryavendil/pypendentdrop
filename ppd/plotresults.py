@@ -1,4 +1,6 @@
-from ppd import error, warning, info, debug, trace, set_verbose
+
+from ppd import error, warning, info, debug, trace # logging
+from ppd import Fitparams, Roi # type-hinting
 from ppd import analyze
 
 import numpy as np
@@ -15,7 +17,7 @@ plt.rcParams.update({'font.family': 'serif', 'font.size': 10,
                      'axes.labelsize': 10,'axes.titlesize': 12,
                      'legend.fontsize': 10})
 
-def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float, fitparams:analyze.Fitparams, comment='', roi=None):
+def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float, fitparams:Fitparams, comment='', roi=None):
     roi = analyze.format_roi(image, roi)
     roi[2] = roi[2] or image.shape[1]
     roi[3] = roi[3] or image.shape[0]
@@ -51,7 +53,7 @@ def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float
     ax.set_ylabel('y [px]')
     ax.set_ylim(image.shape[0], 0)
 
-def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:analyze.Fitparams, comment=''):
+def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:Fitparams, comment=''):
     # axtop.set_title(f'chi2: {analyze.compare_profiles(fitparams, contour, px_per_mm=px_per_mm)}')
     axtop.set_title(f'Comparison of detected contour and computed profile')
 
@@ -129,7 +131,7 @@ def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:analyze.Fitparam
     # axbot.tick_params(axis='y', colors='gray')
     # axbot.xaxis.label.set_color('gray')
 
-def generate_figure(data, contour, px_per_mm, parameters, prefix=None, comment=None, suffix=None, filetype='pdf'):
+def generate_figure(data, contour, px_per_mm, parameters, prefix=None, comment=None, suffix=None, filetype='pdf', roi=None):
     if prefix is None:
         prefix= ''
     if suffix is None:
@@ -138,7 +140,7 @@ def generate_figure(data, contour, px_per_mm, parameters, prefix=None, comment=N
         comment=''
     plt.figure()
     ax = plt.subplot(1, 2, 1)
-    plot_image_contour(ax, data, contour, px_per_mm, parameters, comment)
+    plot_image_contour(ax, data, contour, px_per_mm, parameters, comment=comment, roi=roi)
     ax1, ax2 = plt.subplot(2, 2, 2), plt.subplot(2, 2, 4)
     plot_difference(ax1, ax2, contour, px_per_mm, parameters)
     prefix = f'{prefix}{suffix}'

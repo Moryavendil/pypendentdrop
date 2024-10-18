@@ -5,7 +5,7 @@ import sys
 import argparse
 
 from ppd import error, warning, info, debug, trace, set_verbose
-from ppd import analyze
+import ppd
 
 testdata_filepath = './assets/test_data/water_dsc1884.tif'
 testdata_pxldensity = str(57.0)
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     debug(f'Pixel density provided: {px_per_mm} px/mm')
 
-    import_success, img = analyze.import_image(imagefile)
+    import_success, img = ppd.import_image(imagefile)
 
     if import_success:
         debug(f'Import image successful.')
@@ -79,50 +79,50 @@ if __name__ == "__main__":
     height, width = img.shape
     debug(f'Image shape: {height}x{width}')
 
-    roi = analyze.format_roi(img, [args.tlx, args.tly, args.brx, args.bry])
+    roi = ppd.format_roi(img, [args.tlx, args.tly, args.brx, args.bry])
     debug(f'roi = {roi}')
 
 
     threshold = args.t
     if threshold is None:
         debug('Threshold not provided, using best_threshold to provide it.')
-        threshold = analyze.best_threshold(img, roi=roi)
+        threshold = ppd.best_threshold(img, roi=roi)
 
     debug(f'Threshold level: {threshold}')
 
-    lines = analyze.find_contourLines(img, threshold, roi=roi)
+    lines = ppd.find_contourLines(img, threshold, roi=roi)
     linelengths = [len(line) for line in lines]
 
     debug(f'Number of lines: {len(lines)}, lengths: {linelengths}')
 
-    cnt = analyze.find_mainContour(img, threshold, roi=roi)
+    cnt = ppd.find_mainContour(img, threshold, roi=roi)
 
     debug(f'Drop contour: {cnt.shape[1]} points')
 
-    init_params_estimated = analyze.estimate_parameters(analyze.image_centre(img), cnt, px_per_mm)
+    init_params_estimated = ppd.estimate_parameters(ppd.image_centre(img), cnt, px_per_mm)
 
     init_params_from_args = [args.ai, args.xi, args.yi, args.ri, args.li]
-    analyze.talk_params(init_params_from_args, px_per_mm, talkfn=trace, name='Initial (from arguments)')
+    ppd.talk_params(init_params_from_args, px_per_mm, talkfn=trace, name='Initial (from arguments)')
 
     init_params = []
 
     for i in range(len(init_params_estimated)):
         init_params.append(init_params_from_args[i] or init_params_estimated[i]) # a or b if a is None
 
-    analyze.talk_params(init_params, px_per_mm, talkfn=info, name='Initial')
+    ppd.talk_params(init_params, px_per_mm, talkfn=info, name='Initial')
 
-    debug(f'chi2: {analyze.compare_profiles(init_params, cnt, px_per_mm=px_per_mm)}')
+    debug(f'chi2: {ppd.compare_profiles(init_params, cnt, px_per_mm=px_per_mm)}')
 
     to_fit = [args.af, args.xf, args.yf, args.rf, args.lf]
 
     debug(f'to_fit: {to_fit}')
 
-    opti_success, opti_params = analyze.optimize_profile(cnt, px_per_mm=px_per_mm, parameters_initialguess=init_params, to_fit=to_fit)
+    opti_success, opti_params = ppd.optimize_profile(cnt, px_per_mm=px_per_mm, parameters_initialguess=init_params, to_fit=to_fit)
 
     if opti_success:
-        analyze.talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
+        ppd.talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
 
-        debug(f'chi2: {analyze.compare_profiles(opti_params, cnt, px_per_mm=px_per_mm)}')
+        debug(f'chi2: {ppd.compare_profiles(opti_params, cnt, px_per_mm=px_per_mm)}')
     else:
         warning('Optimization failed :( Falling back to the estimated parameters.')
 
@@ -145,9 +145,9 @@ if __name__ == "__main__":
         from ppd import plotresults
 
         plotresults.generate_figure(img, cnt, px_per_mm, init_params,
-                                    prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf')
+                                    prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
         if opti_success:
             plotresults.generate_figure(img, cnt, px_per_mm, opti_params,
-                                        prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf')
+                                        prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
 
     sys.exit(0)

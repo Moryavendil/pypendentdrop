@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Oct 16 10:55:11 2024
 
@@ -13,7 +11,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 from PySide6.QtCore import QRectF #, QRect
 
-from . import analyze as pd_anal
+from . import analyze
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
@@ -25,7 +23,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
 
     def __init__(self, offset=None):
         super().__init__(self)
-        self.roi:pd_anal.Roi = [0,0, None, None] # TLx, TLy, BRx, BRy
+        self.roi:analyze.Roi = [0,0, None, None] # TLx, TLy, BRx, BRy
 
     def setROI(self, ROIpos, ROIsize):
         self.roi = [int(ROIpos[0]), int(ROIpos[1]),
@@ -50,7 +48,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
         data = self.data
 
         # lines = pg.isocurve(data, self.level, connected=True, extendToEdge=True)
-        lines = pd_anal.find_contourLines(data, self.level, roi=self.roi)
+        lines = analyze.find_contourLines(data, self.level, roi=self.roi)
         self.path = QtGui.QPainterPath()
         for line in lines:
             self.path.moveTo(*line[0])
@@ -85,7 +83,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         # self.show()
         
     def load_image(self, filepath:str = None) -> bool:
-        success, self.data = pd_anal.import_image(filepath)
+        success, self.data = analyze.import_image(filepath)
             
         self.imgheight, self.imgwidth = self.data.shape
         self.imageItem.clear()
@@ -198,7 +196,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         if level is None:
             level = self.defaultLevel
         self.isoCtrlLine.setValue(level)
-        return pd_anal.find_mainContour(self.iso.data, level, roi=self.iso.roi)
+        return analyze.find_mainContour(self.iso.data, level, roi=self.iso.roi)
 
     def plot_computed_profile(self, x, y):
 

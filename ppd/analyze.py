@@ -7,10 +7,8 @@ from scipy.integrate import odeint, trapezoid
 from scipy.optimize import minimize
 import time
 
-from ppd import error, warning, info, debug, trace
-
-Fitparams = List[float]
-Roi = Optional[List[Optional[int]]]
+from ppd import error, warning, info, debug, trace # logging
+from ppd import Fitparams, Roi # type-hinting
 
 # import image and threshold
 def import_image(filePath:Optional[str] = None) -> Tuple[bool, np.ndarray]:
