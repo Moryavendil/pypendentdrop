@@ -3,9 +3,11 @@ import math
 import numpy as np
 from PIL import Image
 from contourpy import contour_generator, LineType
-from scipy.integrate import odeint
+from scipy.integrate import odeint, trapezoid
 from scipy.optimize import minimize
 import time
+
+from ppd import error, warning, info, debug, trace
 
 Fitparams = List[float]
 Roi = Optional[List[Optional[int]]]
@@ -20,17 +22,78 @@ def import_image(filePath:Optional[str] = None) -> Tuple[bool, np.ndarray]:
     :param filePath:
     :return:
     """
+    success = False
+    data = None
+    trace(f'import_image: Trying to open {filePath}')
     if filePath is None:
-        data = np.random.randint(0, 255, (128, 128))
-        success = False
+        debug('import_image: File path provided is None. Failing to import')
     else:
-        imagedata = Image.open(filePath)
-        data = np.asarray(imagedata, dtype="float")
-        if len(data.shape) > 2: # go to gray
-            data = np.mean(data, axis=2)
-        success = True
+        try:
+            imagedata = Image.open(filePath)
+            data = np.asarray(imagedata, dtype="float")
+            if len(data.shape) > 2: # go to gray
+                data = np.mean(data, axis=2)
+            success = True
+        except:
+            warning(f'import_image: Could not import the image at {filePath}')
+    if not success:
+        data = np.random.randint(0, 255, (128, 128))
     return success, data
 
+def best_threshold(data:np.ndarray, roi:Roi=None) -> int:
+    """
+    TO BE IMPLEMENTED
+
+    Trying to find Otsu's most appropriate threshold for the image, falling back to 127 it it fails.
+
+    :param data:
+    :return:
+    """
+    roi = format_roi(data, roi=roi)
+    warning('best_threshold: NOT IMPLEMENTED')
+    return 127
+
+def format_roi(data:np.ndarray, roi:Roi=None):
+    if roi is None:
+        roi = [None, None, None, None] # TLx, TLy, BRx, BRy
+    height, width = data.shape
+    trace(f'format_roi: Formatting roi={roi}=[TLX, TLY, BRX, BRY]')
+
+    tlx, tly, brx, bry = roi
+    if tlx is None:
+        trace('format_roi: TLX not provided.')
+        tlx = 0
+    else:
+        if not(0 <= tlx < width):
+            warning(f'TLX="{tlx}" does not verify 0 <= TLX < width. Its was overriden: TLX=0')
+            tlx = 0
+
+    if tly is None:
+        trace('format_roi: TLX not provided.')
+        tly = 0
+    else:
+        if not(0 <= tly < height):
+            warning(f'TLY="{tly}" does not verify 0 <= TLY < height. Its was overriden: TLY=0')
+            tly = 0
+
+    if brx is None:
+        trace('format_roi: BRX not provided.')
+        brx = None
+    else:
+        if not(tlx <= brx < width):
+            warning(f'BRX="{brx}" does not verify TLX <= BRX < width. Its was overriden: BRX=None (=width)')
+            brx = None
+
+    if bry is None:
+        trace('format_roi: BRY not provided.')
+        bry = None
+    else:
+        if not(tly <= bry < height):
+            warning(f'BRY="{bry}" does not verify TLY <= BRY < height. Its was overriden: BRX=None (=height)')
+            brx = None
+
+    trace(f'format_roi: Formatted ROI={[tlx, tly, brx, bry]}')
+    return [tlx, tly, brx, bry]
 def find_contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> List[np.ndarray]:
     """
     Gets a collection of lines that each a contour of the level **level** of the data.
@@ -41,16 +104,7 @@ def find_contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None) ->
     :param roi:
     :return:
     """
-    if roi is None:
-        roi = [0, 0, None, None] # TLx, TLy, BRx, BRy
-    if (roi[0] is not None) and (roi[0] < 0):
-        roi[0] = 0
-    if (roi[1] is not None) and (roi[1] < 0):
-        roi[1] = 0
-    if (roi[2] is not None) and (roi[2] > data.shape[1]):
-        roi[2] = None
-    if (roi[3] is not None) and (roi[3] > data.shape[0]):
-        roi[3] = None
+    roi = format_roi(data, roi=roi)
     # print('DEBUG: Generating contour lines')
 
     cont_gen = contour_generator(z=data[roi[1]:roi[3], roi[0]:roi[2]], line_type=LineType.Separate) # quad_as_tri=True
@@ -77,7 +131,7 @@ def find_mainContour(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> 
 
 
 # paremeters
-def talk_params(fitparams:Fitparams, px_per_mm:float) -> None:
+def talk_params(fitparams:Fitparams, px_per_mm:float, talkfn=trace, name=None) -> None:
     """
     Mainly a debug function, this displays the value of the parameters in a human readable form in the console.
 
@@ -85,14 +139,16 @@ def talk_params(fitparams:Fitparams, px_per_mm:float) -> None:
     :param px_per_mm:
     :return:
     """
+    if name is None:
+        name = 'Current'
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
-    print('Current parameters:')
-    print('\tpx_per_mm:', round(px_per_mm, 2), 'px/mm')
-    print('\tgravity_angle:', round(gravity_angle*180/np.pi, 2), 'deg')
-    print('\tx_tip_position:', round(x_tip_position, 1), 'px')
-    print('\ty_tip_position:', round(y_tip_position, 1), 'px')
-    print('\tr0:', round(r0_mm ,3), 'mm (=', round(r0_mm*px_per_mm, 1), 'px)')
-    print('\tcapillary_length:', round(capillary_length_mm, 3), 'mm')
+    talkfn(f'{name} parameters:')
+    talkfn(f'\t\tpx_per_mm: {round(px_per_mm, 2) if px_per_mm is not None else None} px/mm')
+    talkfn(f'\t\tgravity_angle: {round(gravity_angle * 180 / np.pi, 2) if gravity_angle is not None else None} deg')
+    talkfn(f'\t\tx_tip_position: {round(x_tip_position, 2) if x_tip_position is not None else None} px')
+    talkfn(f'\t\ty_tip_position: {round(y_tip_position, 2) if y_tip_position is not None else None} px')
+    talkfn(f'\t\tr0: {round(r0_mm, 3) if r0_mm is not None else None} mm (= {round(r0_mm * px_per_mm, 1) if r0_mm is not None else None} px)')
+    talkfn(f'\t\tcapillary_length: {round(capillary_length_mm, 3) if capillary_length_mm is not None else None} mm')
 
 def image_centre(image:np.ndarray) -> np.ndarray:
     """
@@ -216,6 +272,8 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Fitparam
     capillary_length_mm:float = 2.7 # clueless guess : the fluid is pure water
 
     fitparams_init = [gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm]
+
+    talk_params(fitparams_init, px_per_mm=px_per_mm, talkfn=trace, name='estimate_parameter: Result of estimation')
 
     return fitparams_init
 
@@ -349,7 +407,6 @@ def integrated_contour(px_per_mm:float, fitparams:Fitparams) -> Tuple[np.ndarray
     return Rdim, Zdim
 
 #compare computed profile to real profile
-from scipy.integrate import trapezoid
 
 def compare_profiles(fitparams:Fitparams, contour, px_per_mm:float) -> float:
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
@@ -438,151 +495,13 @@ def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialgues
                             bounds=bounds, method='Nelder-Mead', options=options)
     t2 = time.time()
 
-    print('DEBUG:', f'OPTIMIZATION TIME: {int((t2-t1)*1000)} ms')
+    debug(f'Optimisation time: {int((t2-t1)*1000)} ms')
 
-    if minimization.success == True:
-        print(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
-        # print('DEBUG:', minimization.message)
-        # print(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
+    if minimization.success:
+        debug(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
+        trace(f'Minimization message: {minimization.message}')
+        return minimization.x
     else:
-        print('Minimization unsuccessful:', minimization.message)
+        error(f'Minimization unsuccessful: {minimization.message}')
 
-    return minimization.x
-
-#
-# if __name__ == "__main__":
-#     import matplotlib
-#     matplotlib.use('Qt5Agg')
-#     import matplotlib.pyplot as plt
-#     from matplotlib import patches
-#
-#
-#     def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float, fitparams:Fitparams, comment=''):
-#
-#         ax.set_title(f'Image + contour + theory ({comment})')
-#         ax.imshow(image, cmap='gray')
-#
-#         xcontour, ycontour = contour[0], contour[1]
-#         ax.plot(xcontour, ycontour, c='lime', lw=2, label='contour')
-#
-#         gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
-#
-#         l = max(image.shape)
-#         ax.plot((x_tip_position + l * np.sin(-gravity_angle), x_tip_position - l * np.sin(-gravity_angle)), (y_tip_position - l * np.cos(-gravity_angle), y_tip_position + l * np.cos(-gravity_angle)),
-#                 color='b', lw=2, ls='--', label=f'direction of gravity ({comment})')
-#
-#         drop_center_x = x_tip_position + r0_mm * px_per_mm * np.sin(-gravity_angle)
-#         drop_center_y = y_tip_position - r0_mm * px_per_mm * np.cos(-gravity_angle)
-#         # e1 = patches.Arc((drop_center_x, drop_center_y), 2 * r0_mm * px_per_mm, 2 * r0_mm * px_per_mm,  # WARNING CONVENTION
-#         #                  theta1 = 0 - gravity_angle*180/np.pi, theta2 = 180 - gravity_angle*180/np.pi,
-#         #                  linewidth=2, fill=False, zorder=2, color='darkred', ls='--', label=f'curvature ({comment})')
-#         # ax.add_patch(e1)
-#
-#         Rd, Zd = integrated_contour(px_per_mm, fitparams)
-#
-#         ax.scatter(x_tip_position, y_tip_position, s=50, fc='k', ec='lime', linewidths=2, label=f'tip position ({comment})', zorder=4)
-#
-#         ax.plot(Rd, Zd, c='r', lw=2, label=f'computed profile ({comment})')
-#
-#         ax.legend()
-#         ax.set_xlabel('x [px]')
-#         ax.set_xlim(0, image.shape[1])
-#         ax.set_ylabel('y [px]')
-#         ax.set_ylim(image.shape[0], 0)
-#
-#     def plot_difference(ax, contour, px_per_mm, fitparams):
-#         ax.set_title(f'chi2: {compare_profiles(fitparams, contour, px_per_mm=px_per_mm)}')
-#
-#         gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
-#
-#         tipRadius = r0_mm / capillary_length_mm
-#
-#         # hence the profile
-#         R, Z = compute_nondimensional_profile(tipRadius)
-#
-#         # FOR COMPUTE THE DIFF : we take it backward
-#         XY = contour.copy()
-#
-#         #moving
-#         XY[0] -= x_tip_position
-#         XY[1] -= y_tip_position
-#
-#         #  rotating and scaling
-#         XY = rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / (capillary_length_mm * px_per_mm))
-#
-#         # cutting off :
-#         XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)
-#
-#         # separating the two sides
-#         rightside = XY[0] > 0
-#         X1, Y1 = np.take(XY, np.where(rightside)[0], axis=1)
-#         # X2, Y2 = -X[X < 0], Y[X < 0]
-#         # X2, Y2 = XY[:, np.bitwise_not(rightside)
-#         X2, Y2 = np.take(XY, np.where(np.bitwise_not(rightside))[0], axis=1)
-#         X2 *= -1
-#
-#         # the differences
-#         R1 = np.interp(Y1, Z, R) # the radius corresponding to the side 1
-#         R2 = np.interp(Y2, Z, R) # the radius corresponding to the side 2
-#
-#         R1[Y1 < Z.min()] *= 0
-#         R2[Y2 < Z.min()] *= 0
-#         DX1 = X1 - R1
-#         DX2 = X2 - R2
-#
-#         chi2 = np.abs(trapezoid(DX1**2, Y1)) + np.abs(trapezoid(DX2**2, Y2))
-#         # print(f'DGB: CHI2: {chi2}')
-#
-#
-#         ax.plot(Z, R, c='m', ls=':', lw=1)
-#         ax.plot(Y1, R1, c='r', lw=1)
-#         ax.plot(Y2, R2, c='r', lw=1)
-#         ax.plot(Y1, X1, c='lime', lw=1)
-#         ax.plot(Y2, X2, c='lime', lw=1)
-#
-#         ax2 = ax.twinx()
-#         ax2.plot(Y1, DX1, c='gray')
-#         ax2.plot(Y2, DX2, c='gray')
-#
-#     imagepath = 'testimages/water_dsc1884_rotated.tif'
-#     px_per_mm = 114/2
-#
-#     print(f'Image path used: {imagepath}')
-#
-#     success, img = import_image(imagepath)
-#
-#     print(f'Import image successful: {success}')
-#
-#     level = 127
-#
-#     print(f'Threshold level: {level}')
-#
-#     lines = find_contourLines(img, level)
-#     linelengths = [len(line) for line in lines]
-#
-#     print(f'Number of lines: {len(lines)}, lengths: {linelengths}')
-#
-#     cnt = np.array(lines[np.argmax(linelengths)]).T
-#
-#     print(f'Drop contour: {len(cnt)} points')
-#
-#     init_params = estimate_parameters(img, cnt, px_per_mm)
-#
-#     print(f'Initial (guessed) parameters:')
-#     talk_params(init_params, px_per_mm=px_per_mm)
-#
-#     print(f'chi2: {compare_profiles(init_params, cnt, px_per_mm=px_per_mm)}')
-#
-#     fig , (ax1, ax2) = plt.subplots(1, 2)
-#     plot_image_contour(ax1, img, cnt, px_per_mm, init_params, 'initial (guessed) parameters')
-#     plot_difference(ax2, cnt, px_per_mm, init_params)
-#
-#     opti_params = optimize_profile(init_params, cnt, px_per_mm=px_per_mm)
-#
-#     print(f'Optimized parameters:')
-#     talk_params(opti_params, px_per_mm=px_per_mm)
-#
-#     fig2 , (ax21, ax22) = plt.subplots(1, 2)
-#     plot_image_contour(ax21, img, cnt, px_per_mm, opti_params, 'fitted parameters')
-#     plot_difference(ax22, cnt, px_per_mm, opti_params)
-
+    return parameters_initialguess

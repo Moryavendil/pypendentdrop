@@ -3,6 +3,9 @@
 venv*
 # IntelliJ stuff
 .idea/*
+# Our things
+*_initialestimate.*
+*_optimalestimate.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

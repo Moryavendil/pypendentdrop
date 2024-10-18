@@ -1,3 +1,6 @@
+#!venv-ppd/bin/python3.10
+# -*- coding: utf-8 -*-
+
 import sys
 from PySide6.QtWidgets import QApplication
 from ppd.gui import ppd_mainwindow
