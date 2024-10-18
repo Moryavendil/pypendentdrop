@@ -1,4 +1,4 @@
-#!venv-ppd/bin/python3.10
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys
@@ -7,10 +7,14 @@ import argparse
 from ppd import error, warning, info, debug, trace, set_verbose
 from ppd import anal
 
+testdata_filepath = './assets/test_data/water_dsc1884.tif'
+testdata_pxldensity = str(57.0)
+testdata_rhog = str(9.81)
+
 parser = argparse.ArgumentParser(
     prog='ppd_commandLine',
     description='PyPendentDrop - Command line version',
-    epilog='To test this, type "./ppd_commandline.py -n ./assets/test_data/water_dsc1884.tif -p 57.0 -g 9.81 -o test_drop"', add_help=True)
+    epilog=f'To test this, type "./ppd_commandline.py -n {testdata_filepath} -p {testdata_pxldensity} -g {testdata_rhog} -o test_drop"', add_help=True)
 parser.add_argument('-n', metavar='FILENAME', help='filename', type=argparse.FileType('rb'))
 parser.add_argument('-p', metavar='PXL_DENSITY', help='Pixel density (mm/px)', type=float)
 parser.add_argument('-g', metavar='RHOG', help='Value of rho*g/1000 (typically 9.81)', type=float)
@@ -47,14 +51,19 @@ if __name__ == "__main__":
 
     imagefile = args.n
     if imagefile is None:
-        error(f'No image file provided. Please provide the image file you want to analyze using the `-n` option')
+        error(f'No image file provided.')
+        error(f'Use -n to specify the image you want to analyze (e.g. -n {testdata_filepath})')
+        error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
+        error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
         sys.exit(101)
 
     debug(f'Image path provided: {imagefile}')
 
     px_per_mm = args.p
     if px_per_mm is None:
-        error(f'No pixel density provided. PLease provide the number of px per mm using the `-p` option')
+        error(f'No pixel density provided.')
+        error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
+        error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
         sys.exit(102)
 
     debug(f'Pixel density provided: {px_per_mm} px/mm')
@@ -123,7 +132,8 @@ if __name__ == "__main__":
 
     rhog = args.g
     if rhog is None:
-        error(f'No density contrast provided, could not compute surface tension. Please provide the density contrast (Delta rho*g) using the `-g` option')
+        error(f'No density contrast provided, could not compute surface tension.')
+        error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
     else:
         gamma = rhog * caplength_mm**2
         print(f'Surface tension gamma: {round(gamma, 3)} mN/m')
