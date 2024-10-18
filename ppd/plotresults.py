@@ -1,5 +1,5 @@
 from ppd import error, warning, info, debug, trace, set_verbose
-from ppd import anal
+from ppd import analyze
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,8 +15,8 @@ plt.rcParams.update({'font.family': 'serif', 'font.size': 10,
                      'axes.labelsize': 10,'axes.titlesize': 12,
                      'legend.fontsize': 10})
 
-def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float, fitparams:anal.Fitparams, comment='', roi=None):
-    roi = anal.format_roi(image, roi)
+def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float, fitparams:analyze.Fitparams, comment='', roi=None):
+    roi = analyze.format_roi(image, roi)
     roi[2] = roi[2] or image.shape[1]
     roi[3] = roi[3] or image.shape[0]
     ax.set_title(f'Drop image and contour ({comment})')
@@ -39,7 +39,7 @@ def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float
                      linewidth=2, fill=False, zorder=2, color='darkred', ls='--', label=f'Curvature')
     ax.add_patch(e1)
 
-    Rd, Zd = anal.integrated_contour(px_per_mm, fitparams)
+    Rd, Zd = analyze.integrated_contour(px_per_mm, fitparams)
 
     ax.scatter(x_tip_position, y_tip_position, s=50, fc='k', ec='lime', linewidths=2, label=f'Tip position', zorder=4)
 
@@ -51,8 +51,8 @@ def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float
     ax.set_ylabel('y [px]')
     ax.set_ylim(image.shape[0], 0)
 
-def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:anal.Fitparams, comment=''):
-    # axtop.set_title(f'chi2: {anal.compare_profiles(fitparams, contour, px_per_mm=px_per_mm)}')
+def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:analyze.Fitparams, comment=''):
+    # axtop.set_title(f'chi2: {analyze.compare_profiles(fitparams, contour, px_per_mm=px_per_mm)}')
     axtop.set_title(f'Comparison of detected contour and computed profile')
 
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
@@ -60,7 +60,7 @@ def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:anal.Fitparams, 
     tipRadius = r0_mm / capillary_length_mm
 
     # hence the profile
-    R, Z = anal.compute_nondimensional_profile(tipRadius)
+    R, Z = analyze.compute_nondimensional_profile(tipRadius)
 
     # FOR COMPUTE THE DIFF : we take it backward
     XY = contour.copy()
@@ -70,7 +70,7 @@ def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:anal.Fitparams, 
     XY[1] -= y_tip_position
 
     #  rotating and scaling
-    XY = anal.rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / (capillary_length_mm * px_per_mm))
+    XY = analyze.rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / (capillary_length_mm * px_per_mm))
 
     # cutting off :
     XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)

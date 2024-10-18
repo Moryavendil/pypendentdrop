@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QMainWindow, QFileDialog
 from .ppd_mainwindow import Ui_PPD_MainWindow
 from .ppd_plotwidget import ppd_plotWidget
 
-from . import anal as pd_anal
+from . import analyze as pd_anal
 
 
 RAD_PER_DEG = np.pi/180

@@ -13,7 +13,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui
 from PySide6.QtCore import QRectF #, QRect
 
-from . import anal as pd_anal
+from . import analyze as pd_anal
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
