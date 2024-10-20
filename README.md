@@ -7,15 +7,16 @@ Python scripts (GUI and/or command line) to measure surface tension from images 
 All versions of PypendentDrop rely on
 
 * `numpy` (for algebra)
+* `pillow` (for image reading)
 * `contourpy` (for contour detection)
 * `scipy` (for parameters optimization)
 
 Additionnaly, the GUI version relies on
 
-* `PySide6` (Qt6 for UI)
 * `pyqtgraph` (fast responsive graphs)
+* Any Qt distribution for Python supported by PyQtGraph: `PyQt6`, `PySide6`, `PyQt5` or `PySide2`
 
-The command-line version do not require Qt but relies on `matplotlib` for plotting the results if using th `-o` option.
+The command-line version does not require Qt but relies on `matplotlib` for plotting the results when using the `-o` option.
 
 ### Use the command-line version
 Install scipy if you do not have it 

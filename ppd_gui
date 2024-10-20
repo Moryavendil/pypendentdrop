@@ -1,14 +1,14 @@
 #!venv-ppd/bin/python3.10
 # -*- coding: utf-8 -*-
 
-import sys
-from PySide6.QtWidgets import QApplication
+import pyqtgraph as pg
 from ppd.gui import ppd_mainwindow
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
+if __name__ == '__main__':
+    app = pg.mkQApp("PyPendentDrop")
 
     mainwindow = ppd_mainwindow()
 
     mainwindow.show()
-    sys.exit(app.exec())
+    
+    pg.exec()

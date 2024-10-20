@@ -4,8 +4,9 @@
 # Main window
 from typing import Tuple, Union, Optional, Dict, Any, List
 import numpy as np
-from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QMainWindow, QFileDialog
+
+from pyqtgraph.Qt.QtGui import QPixmap
+from pyqtgraph.Qt.QtWidgets import QMainWindow, QFileDialog
 
 from .ppd_mainwindow import Ui_PPD_MainWindow
 from .ppd_plotwidget import ppd_plotWidget

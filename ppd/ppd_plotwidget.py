@@ -8,8 +8,8 @@ from typing import Tuple, Union, Optional, Dict, Any, List
 import numpy as np
 
 import pyqtgraph as pg
+from pyqtgraph.Qt.QtCore import QRectF
 from pyqtgraph.Qt import QtGui
-from PySide6.QtCore import QRectF #, QRect
 
 from . import analyze
 
