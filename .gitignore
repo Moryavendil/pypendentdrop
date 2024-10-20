@@ -1,11 +1,13 @@
 ### Custom ignores
 # python virtual environment
 venv*
-# IntelliJ stuff
-.idea/*
 # Our things
 *_initialestimate.*
 *_optimalestimate.*
+# dist stuff
+dist/*
+# test files and misc
+deleteme_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -168,4 +170,4 @@ cython_debug/
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+.idea/

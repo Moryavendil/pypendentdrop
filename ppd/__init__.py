@@ -1,6 +1,8 @@
 from typing import Tuple, Union, Optional, Dict, Any, List
 import numpy as np
 
+__version__ = '1.0.0.dev1'
+
 verbose = 0
 class bcolors:
     HEADER = '\033[95m'
