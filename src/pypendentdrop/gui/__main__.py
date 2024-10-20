@@ -1,8 +1,5 @@
-#!venv-ppd/bin/python3.10
-# -*- coding: utf-8 -*-
-
 import pyqtgraph as pg
-from ppd.gui import ppd_mainwindow
+from mainwindow import ppd_mainwindow
 
 if __name__ == '__main__':
     app = pg.mkQApp("PyPendentDrop")

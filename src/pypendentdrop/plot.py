@@ -1,7 +1,7 @@
 
-from ppd import error, warning, info, debug, trace # logging
-from ppd import Fitparams, Roi # type-hinting
-from ppd import analyze
+from . import error, warning, info, debug, trace # logging
+from . import Fitparams, Roi # type-hinting
+from . import analyze
 
 import numpy as np
 import matplotlib.pyplot as plt

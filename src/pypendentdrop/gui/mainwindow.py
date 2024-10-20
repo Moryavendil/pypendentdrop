@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 # Main window
 from typing import Tuple, Union, Optional, Dict, Any, List
 import numpy as np
@@ -8,10 +5,10 @@ import numpy as np
 from pyqtgraph.Qt.QtGui import QPixmap
 from pyqtgraph.Qt.QtWidgets import QMainWindow, QFileDialog
 
-from .ppd_mainwindow import Ui_PPD_MainWindow
-from .ppd_plotwidget import ppd_plotWidget
+from mainwindow_ui import Ui_PPD_MainWindow
+from plotwidget import ppd_plotWidget
 
-from . import analyze
+from .. import analyze
 
 
 RAD_PER_DEG = np.pi/180

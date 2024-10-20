@@ -1,11 +1,7 @@
 ### Custom ignores
-# python virtual environment
-venv*
 # Our things
 *_initialestimate.*
 *_optimalestimate.*
-# dist stuff
-dist/*
 # test files and misc
 deleteme_*
 

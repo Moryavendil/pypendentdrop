@@ -1,5 +1,4 @@
 from typing import Tuple, Union, Optional, Dict, Any, List
-import numpy as np
 
 __version__ = '1.0.0.dev1'
 

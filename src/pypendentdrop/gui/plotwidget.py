@@ -11,7 +11,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt.QtCore import QRectF
 from pyqtgraph.Qt import QtGui
 
-from . import analyze
+from .. import analyze
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
