@@ -2,6 +2,12 @@
 
 Python scripts (GUI and/or command line) to measure surface tension from images of pendent drops.
 
+### Without installing
+
+    python3.10 -m src.pypendentdrop.gui
+    
+
+
 ### Dependencies
 
 All versions of PypendentDrop rely on

@@ -45,6 +45,5 @@ Fitparams = List[float]
 Roi = Optional[List[Optional[int]]]
 
 ###### ANALYZE
-from .analyze import import_image, best_threshold, format_roi, find_contourLines, find_mainContour, talk_params, \
-    image_centre, getrotationandscalematrix, rotate_and_scale, estimate_parameters, greater_possible_zMax, \
-    compute_nondimensional_profile, integrated_contour, compare_profiles, optimize_profile
+from .analyze import *
+

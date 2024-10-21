@@ -2,11 +2,11 @@
 from typing import Tuple, Union, Optional, Dict, Any, List
 import numpy as np
 
-from pyqtgraph.Qt.QtGui import QPixmap
+# from pyqtgraph.Qt.QtGui import QPixmap
 from pyqtgraph.Qt.QtWidgets import QMainWindow, QFileDialog
 
-from mainwindow_ui import Ui_PPD_MainWindow
-from plotwidget import ppd_plotWidget
+from .mainwindow_ui import Ui_PPD_MainWindow
+from .plotwidget import ppd_plotWidget
 
 from .. import analyze
 
@@ -22,9 +22,9 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
         ### LEFT SIDE
 
-        # The widget #0 of displayStackedWidget is the welcome image illustration
-        pixmap = QPixmap('assets/images/ppd_illustration.png')
-        self.welcomeIcon.setPixmap(pixmap)
+        # # The widget #0 of displayStackedWidget is the welcome image illustration
+        # pixmap = QPixmap('assets/images/ppd_illustration.png')
+        # self.welcomeIcon.setPixmap(pixmap)
 
         # # The widget #1 of displayStackedWidget is the image shown by pyqtgraph
         self.plotWidget = ppd_plotWidget(self)

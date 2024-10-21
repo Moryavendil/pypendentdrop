@@ -4,8 +4,8 @@
 import sys
 import argparse
 
-from ppd import error, warning, info, debug, trace, set_verbose
-import ppd
+from . import error, warning, info, debug, trace, set_verbose
+import pypendentdrop as ppd
 
 testdata_filepath = './assets/test_data/water_dsc1884.tif'
 testdata_pxldensity = str(57.0)
