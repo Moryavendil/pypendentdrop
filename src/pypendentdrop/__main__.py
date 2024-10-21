@@ -9,7 +9,7 @@ import argparse
 #     if hasattr(logging, 'TRACE'):
 #         logging.getLogger(__name__).trace(msg)
 
-from .logfacility import set_verbose
+from . import logfacility
 
 
 from . import *
@@ -54,7 +54,7 @@ group3.add_argument('--lf', help='Fix the capillary length', action='store_false
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    set_verbose(args.v)
+    logfacility.set_verbose(args.v)
 
     imagefile = args.n
     if imagefile is None:

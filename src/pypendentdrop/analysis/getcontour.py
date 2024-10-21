@@ -2,12 +2,7 @@ from typing import Tuple, Union, Optional, Dict, Any, List
 import numpy as np
 from contourpy import contour_generator, LineType
 
-
-import logging
-logger=logging.getLogger(__name__)
-def trace(msg:str):
-    if hasattr(logging, 'TRACE'):
-        logging.getLogger(__name__).trace(msg)
+from .. import error, warning, info, debug, trace
 
 # Region OF Interest management
 Roi = Optional[List[Optional[int]]]
@@ -16,7 +11,6 @@ def format_roi(data:np.ndarray, roi:Roi=None):
     if roi is None:
         roi = [None, None, None, None] # TLx, TLy, BRx, BRy
     height, width = data.shape
-    trace(f'format_roi: Formatting roi={roi}=[TLX, TLY, BRX, BRY]')
 
     tlx, tly, brx, bry = roi
     if tlx is None:
@@ -24,7 +18,7 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         tlx = 0
     else:
         if not(0 <= tlx < width):
-            logger.warning(f'TLX="{tlx}" does not verify 0 <= TLX < width. Its was overriden: TLX=0')
+            warning(f'TLX="{tlx}" does not verify 0 <= TLX < width. Its was overriden: TLX=0')
             tlx = 0
 
     if tly is None:
@@ -32,7 +26,7 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         tly = 0
     else:
         if not(0 <= tly < height):
-            logger.warning(f'TLY="{tly}" does not verify 0 <= TLY < height. Its was overriden: TLY=0')
+            warning(f'TLY="{tly}" does not verify 0 <= TLY < height. Its was overriden: TLY=0')
             tly = 0
 
     if brx is None:
@@ -40,7 +34,7 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         brx = None
     else:
         if not(tlx <= brx < width):
-            logger.warning(f'BRX="{brx}" does not verify TLX <= BRX < width. Its was overriden: BRX=None (=width)')
+            warning(f'BRX="{brx}" does not verify TLX <= BRX < width. Its was overriden: BRX=None (=width)')
             brx = None
 
     if bry is None:
@@ -48,10 +42,10 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         bry = None
     else:
         if not(tly <= bry < height):
-            logger.warning(f'BRY="{bry}" does not verify TLY <= BRY < height. Its was overriden: BRX=None (=height)')
+            warning(f'BRY="{bry}" does not verify TLY <= BRY < height. Its was overriden: BRX=None (=height)')
             brx = None
 
-    trace(f'format_roi: Formatted ROI={[tlx, tly, brx, bry]}')
+    trace(f'format_roi: {roi} -> {[tlx, tly, brx, bry]}')
     return [tlx, tly, brx, bry]
 
 def best_threshold(data:np.ndarray, roi:Roi=None) -> int:
@@ -64,7 +58,7 @@ def best_threshold(data:np.ndarray, roi:Roi=None) -> int:
     :return:
     """
     roi = format_roi(data, roi=roi)
-    logger.warning('best_threshold: NOT IMPLEMENTED')
+    warning('best_threshold: NOT IMPLEMENTED')
     return 127
 
 def find_contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> List[np.ndarray]:

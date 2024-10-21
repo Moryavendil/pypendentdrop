@@ -5,11 +5,8 @@ from scipy.integrate import odeint, trapezoid
 from scipy.optimize import minimize
 import time
 
-import logging
-logger=logging.getLogger(__name__)
-def trace(msg:str):
-    if hasattr(logging, 'TRACE'):
-        logging.getLogger(__name__).trace(msg)
+from .. import error, warning, info, debug, trace
+
 
 Fitparams = List[float]
 
@@ -377,16 +374,16 @@ def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialgues
     minimization = minimize(compare_profiles, x0=np.array(parameters_initialguess), args=(contour_opti, px_per_mm),
                             bounds=bounds, method='Nelder-Mead', options=options)
     t2 = time.time()
-    logger.debug(f'Optimisation time: {int((t2-t1)*1000)} ms')
+    debug(f'Optimisation time: {int((t2-t1)*1000)} ms')
 
     optimization_success = minimization.success
 
     if not(minimization.success):
-        logger.info('Minimizaton failed')
-        logger.debug(f'Minimization unsuccessful: {minimization.message}')
+        info('Minimizaton failed')
+        debug(f'Minimization unsuccessful: {minimization.message}')
         return False, parameters_initialguess
 
-    logger.debug(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
+    debug(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
     trace(f'Minimization message: {minimization.message}')
 
     return True, minimization.x

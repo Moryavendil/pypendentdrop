@@ -1,26 +1,21 @@
-from typing import Tuple, Union, Optional, Dict, Any, List
-
-__version__ = '1.0.0.dev1'
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+__version__ = '0.0.1.dev0'
 
 import logging
 logger = logging.getLogger(__name__)
-def trace(msg:str):
-    if hasattr(logging, 'TRACE'):
-        logging.getLogger(__name__).trace(msg)
-
 logger.addHandler(logging.NullHandler()) # so that messages are not shown in strerr
-
+def error(msg:str):
+    logger.error(msg)
+def warning(msg:str):
+    logger.warning(msg)
+def info(msg:str):
+    logger.info(msg)
+def debug(msg:str):
+    logger.debug(msg)
+def trace(msg:str):
+    try:
+        logger.trace(msg)
+    except:
+        pass
 # # # REMOVE THIS AT ALL COSTS
 # def addLoggingLevel(levelName, levelNum, methodName=None):
 #     """
@@ -70,9 +65,6 @@ logger.addHandler(logging.NullHandler()) # so that messages are not shown in str
 #                     ) # REMOVE THIS
 
 logger.debug('pypendentdrop loaded')
-
-
-trace('We have trace, yay')
 
 ###### ANALYZE
 from .analysis.fetchimage import *
