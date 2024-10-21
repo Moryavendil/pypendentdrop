@@ -1,12 +1,3 @@
-"""
-Created on Wed Oct 16 10:55:11 2024
-
-@author: G2L
-"""
-from typing import Tuple, Union, Optional, Dict, Any, List
-
-import numpy as np
-
 import pyqtgraph as pg
 from pyqtgraph.Qt.QtCore import QRectF
 from pyqtgraph.Qt import QtGui

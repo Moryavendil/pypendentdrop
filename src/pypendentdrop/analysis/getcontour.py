@@ -1,5 +1,6 @@
 from typing import Tuple, Union, Optional, Dict, Any, List
 import numpy as np
+import warnings
 from contourpy import contour_generator, LineType
 
 from .. import error, warning, info, debug, trace
@@ -48,18 +49,52 @@ def format_roi(data:np.ndarray, roi:Roi=None):
     trace(f'format_roi: {roi} -> {[tlx, tly, brx, bry]}')
     return [tlx, tly, brx, bry]
 
-def best_threshold(data:np.ndarray, roi:Roi=None) -> int:
-    """
-    TO BE IMPLEMENTED
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
+def otsu_intraclass_variance(image, threshold):
+    """
+    Otsu's intra-class variance.
+    If all pixels are above or below the threshold, this will throw a warning that can safely be ignored.
+    """
+    try:
+        return np.nansum(
+            [
+                np.mean(cls) * np.var(image, where=cls)
+                #   weight   ·  intra-class variance
+                for cls in [image >= threshold, image < threshold]
+            ]
+        )
+    except:
+        return 0
+    # NaNs only arise if the class is empty, in which case the contribution should be zero, which `nansum` accomplishes.
+
+def otsu_threshold(data:np.ndarray) -> int:
+    test_tresholds = np.arange(255, dtype=float)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        otsu_variance = np.array([otsu_intraclass_variance(data, test_treshold) for test_treshold in test_tresholds])
+
+    best_threshold_otsu = int(test_tresholds[np.argmin(otsu_variance)])
+
+    return best_threshold_otsu
+
+def best_threshold(image:np.ndarray, roi:Roi=None) -> int:
+    """
     Trying to find Otsu's most appropriate threshold for the image, falling back to 127 it it fails.
 
-    :param data:
+    :param image:
     :return:
     """
-    roi = format_roi(data, roi=roi)
-    warning('best_threshold: NOT IMPLEMENTED')
-    return 127
+    roi = format_roi(image, roi=roi)
+    try:
+        threshold:int = otsu_threshold(image[roi[0]:roi[2], roi[1]:roi[3]])
+    except:
+        threshold = 127
+        error('Encountered an error while computing the best threshold')
+    trace(f'best_threshold: Best threshold for the selected region of the image is {threshold}')
+    return threshold
 
 def find_contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> List[np.ndarray]:
     """
