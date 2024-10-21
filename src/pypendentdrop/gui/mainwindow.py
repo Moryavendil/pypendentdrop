@@ -5,10 +5,10 @@ import numpy as np
 # from pyqtgraph.Qt.QtGui import QPixmap
 from pyqtgraph.Qt.QtWidgets import QMainWindow, QFileDialog
 
+from .. import *
+
 from .mainwindow_ui import Ui_PPD_MainWindow
 from .plotwidget import ppd_plotWidget
-
-from .. import analyze
 
 
 RAD_PER_DEG = np.pi/180
@@ -228,12 +228,12 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         mainContour = self.plotWidget.isoCurve_level(level=threshold)
         # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
-        image_centre = analyze.image_centre(np.array(self.plotWidget.iso.data))
-        # print('DEBUG:', f'image centre (rotation centre): {image_centre}')
+        imagecentre = image_centre(np.array(self.plotWidget.iso.data))
+        # print('DEBUG:', f'image centre (rotation centre): {imagecentre}')
 
-        self.parameters = analyze.estimate_parameters(image_centre, mainContour, px_per_mm=px_per_mm)
+        self.parameters = estimate_parameters(imagecentre, mainContour, px_per_mm=px_per_mm)
 
-        analyze.talk_params(self.parameters, px_per_mm=px_per_mm)
+        talk_params(self.parameters, px_per_mm=px_per_mm)
 
         self.applyParameters()
 
@@ -266,17 +266,17 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             print('DEBUG:', f'To fit: {to_fit}')
 
-            opti_success, self.parameters = analyze.optimize_profile(mainContour, px_per_mm=px_per_mm,
+            opti_success, self.parameters = optimize_profile(mainContour, px_per_mm=px_per_mm,
                                                        parameters_initialguess=self.parameters, to_fit=to_fit)
 
-            analyze.talk_params(self.parameters, px_per_mm=px_per_mm)
+            talk_params(self.parameters, px_per_mm=px_per_mm)
 
             self.applyParameters()
 
     def actualizeComputedCurve(self):
         if self.areParametersValid():
             px_per_mm = self.pixelDensitySpinBox.value()
-            R, Z = analyze.integrated_contour(px_per_mm, self.parameters)
+            R, Z = integrated_contour(px_per_mm, self.parameters)
 
             self.plotWidget.plot_computed_profile(R, Z)
 

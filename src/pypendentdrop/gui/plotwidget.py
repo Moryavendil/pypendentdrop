@@ -11,7 +11,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt.QtCore import QRectF
 from pyqtgraph.Qt import QtGui
 
-from .. import analyze
+from .. import *
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
@@ -23,7 +23,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
 
     def __init__(self, offset=None):
         super().__init__(self)
-        self.roi:analyze.Roi = [0,0, None, None] # TLx, TLy, BRx, BRy
+        self.roi = [0,0, None, None] # TLx, TLy, BRx, BRy
 
     def setROI(self, ROIpos, ROIsize):
         self.roi = [int(ROIpos[0]), int(ROIpos[1]),
@@ -48,7 +48,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
         data = self.data
 
         # lines = pg.isocurve(data, self.level, connected=True, extendToEdge=True)
-        lines = analyze.find_contourLines(data, self.level, roi=self.roi)
+        lines = find_contourLines(data, self.level, roi=self.roi)
         self.path = QtGui.QPainterPath()
         for line in lines:
             self.path.moveTo(*line[0])
@@ -83,7 +83,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         # self.show()
         
     def load_image(self, filepath:str = None) -> bool:
-        success, self.data = analyze.import_image(filepath)
+        success, self.data = import_image(filepath)
             
         self.imgheight, self.imgwidth = self.data.shape
         self.imageItem.clear()
@@ -196,7 +196,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         if level is None:
             level = self.defaultLevel
         self.isoCtrlLine.setValue(level)
-        return analyze.find_mainContour(self.iso.data, level, roi=self.iso.roi)
+        return find_mainContour(self.iso.data, level, roi=self.iso.roi)
 
     def plot_computed_profile(self, x, y):
 

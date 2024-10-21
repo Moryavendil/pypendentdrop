@@ -6,6 +6,7 @@ Python scripts (GUI and/or command line) to measure surface tension from images 
 
     python3.10 -m src.pypendentdrop.gui
     
+    python3.10 -m src.pypendentdrop.tests.findsymmetryangle
 
 
 ### Dependencies

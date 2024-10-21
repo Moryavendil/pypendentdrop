@@ -4,8 +4,15 @@
 import sys
 import argparse
 
-from . import error, warning, info, debug, trace, set_verbose
-import pypendentdrop as ppd
+# import logging
+# def trace(msg:str):
+#     if hasattr(logging, 'TRACE'):
+#         logging.getLogger(__name__).trace(msg)
+
+from .logfacility import set_verbose
+
+
+from . import *
 
 testdata_filepath = './assets/test_data/water_dsc1884.tif'
 testdata_pxldensity = str(57.0)
@@ -19,7 +26,7 @@ parser.add_argument('-n', metavar='FILENAME', help='filename', type=argparse.Fil
 parser.add_argument('-p', metavar='PXL_DENSITY', help='Pixel density (mm/px)', type=float)
 parser.add_argument('-g', metavar='RHOG', help='Value of rho*g/1000 (typically 9.81)', type=float)
 parser.add_argument('-o', metavar='OUTPUTFILE', help='Generate graphs [optional:file prefix]', type=str, nargs='?', const='drop', default = None)
-parser.add_argument('-v', help='Verbosity (-v: info, -vv: debug, -vvv: trace)', action="count", default=0)
+parser.add_argument('-v', help='Verbosity (-v: info, -vv: logger.debug, -vvv: trace)', action="count", default=0)
 
 group1 = parser.add_argument_group('Drop contour detection options')
 group1.add_argument('-t', metavar='THRESHOLD', help='Threshold level', type=int)
@@ -51,80 +58,80 @@ if __name__ == "__main__":
 
     imagefile = args.n
     if imagefile is None:
-        error(f'No image file provided.')
-        error(f'Use -n to specify the image you want to analyze (e.g. -n {testdata_filepath})')
-        error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
-        error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
+        logger.error(f'No image file provided.')
+        logger.error(f'Use -n to specify the image you want to analyze (e.g. -n {testdata_filepath})')
+        logger.error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
+        logger.error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
         sys.exit(101)
 
-    debug(f'Image path provided: {imagefile}')
+    logger.debug(f'Image path provided: {imagefile}')
 
     px_per_mm = args.p
     if px_per_mm is None:
-        error(f'No pixel density provided.')
-        error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
-        error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
+        logger.error(f'No pixel density provided.')
+        logger.error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
+        logger.error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
         sys.exit(102)
 
-    debug(f'Pixel density provided: {px_per_mm} px/mm')
+    logger.debug(f'Pixel density provided: {px_per_mm} px/mm')
 
-    import_success, img = ppd.import_image(imagefile)
+    import_success, img = import_image(imagefile)
 
     if import_success:
-        debug(f'Import image successful.')
+        logger.debug(f'Import image successful.')
     else:
-        error(f'Could not retreive the image at {imagefile}')
+        logger.error(f'Could not retreive the image at {imagefile}')
         sys.exit(200)
 
     height, width = img.shape
-    debug(f'Image shape: {height}x{width}')
+    logger.debug(f'Image shape: {height}x{width}')
 
-    roi = ppd.format_roi(img, [args.tlx, args.tly, args.brx, args.bry])
-    debug(f'roi = {roi}')
+    roi = format_roi(img, [args.tlx, args.tly, args.brx, args.bry])
+    logger.debug(f'roi = {roi}')
 
 
     threshold = args.t
     if threshold is None:
-        debug('Threshold not provided, using best_threshold to provide it.')
-        threshold = ppd.best_threshold(img, roi=roi)
+        logger.debug('Threshold not provided, using best_threshold to provide it.')
+        threshold = best_threshold(img, roi=roi)
 
-    debug(f'Threshold level: {threshold}')
+    logger.debug(f'Threshold level: {threshold}')
 
-    lines = ppd.find_contourLines(img, threshold, roi=roi)
+    lines = find_contourLines(img, threshold, roi=roi)
     linelengths = [len(line) for line in lines]
 
-    debug(f'Number of lines: {len(lines)}, lengths: {linelengths}')
+    logger.debug(f'Number of lines: {len(lines)}, lengths: {linelengths}')
 
-    cnt = ppd.find_mainContour(img, threshold, roi=roi)
+    cnt = find_mainContour(img, threshold, roi=roi)
 
-    debug(f'Drop contour: {cnt.shape[1]} points')
+    logger.debug(f'Drop contour: {cnt.shape[1]} points')
 
-    init_params_estimated = ppd.estimate_parameters(ppd.image_centre(img), cnt, px_per_mm)
+    init_params_estimated = estimate_parameters(image_centre(img), cnt, px_per_mm)
 
     init_params_from_args = [args.ai, args.xi, args.yi, args.ri, args.li]
-    ppd.talk_params(init_params_from_args, px_per_mm, talkfn=trace, name='Initial (from arguments)')
+    talk_params(init_params_from_args, px_per_mm, talkfn=trace, name='Initial (from arguments)')
 
     init_params = []
 
     for i in range(len(init_params_estimated)):
         init_params.append(init_params_from_args[i] or init_params_estimated[i]) # a or b if a is None
 
-    ppd.talk_params(init_params, px_per_mm, talkfn=info, name='Initial')
+    talk_params(init_params, px_per_mm, talkfn=logger.info, name='Initial')
 
-    debug(f'chi2: {ppd.compare_profiles(init_params, cnt, px_per_mm=px_per_mm)}')
+    logger.debug(f'chi2: {compare_profiles(init_params, cnt, px_per_mm=px_per_mm)}')
 
     to_fit = [args.af, args.xf, args.yf, args.rf, args.lf]
 
-    debug(f'to_fit: {to_fit}')
+    logger.debug(f'to_fit: {to_fit}')
 
-    opti_success, opti_params = ppd.optimize_profile(cnt, px_per_mm=px_per_mm, parameters_initialguess=init_params, to_fit=to_fit)
+    opti_success, opti_params = optimize_profile(cnt, px_per_mm=px_per_mm, parameters_initialguess=init_params, to_fit=to_fit)
 
     if opti_success:
-        ppd.talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
+        talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
 
-        debug(f'chi2: {ppd.compare_profiles(opti_params, cnt, px_per_mm=px_per_mm)}')
+        logger.debug(f'chi2: {compare_profiles(opti_params, cnt, px_per_mm=px_per_mm)}')
     else:
-        warning('Optimization failed :( Falling back to the estimated parameters.')
+        logger.warning('Optimization failed :( Falling back to the estimated parameters.')
 
     r0_mm = opti_params[3]
     caplength_mm = opti_params[4]
@@ -135,19 +142,19 @@ if __name__ == "__main__":
 
     rhog = args.g
     if rhog is None:
-        error(f'No density contrast provided, could not compute surface tension.')
-        error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
+        logger.error(f'No density contrast provided, could not compute surface tension.')
+        logger.error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
     else:
         gamma = rhog * caplength_mm**2
         print(f'Surface tension gamma: {round(gamma, 3)} mN/m')
 
     if args.o is not None:
-        from ppd import plotresults
+        from . import plot
 
-        plotresults.generate_figure(img, cnt, px_per_mm, init_params,
+        plot.generate_figure(img, cnt, px_per_mm, init_params,
                                     prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
         if opti_success:
-            plotresults.generate_figure(img, cnt, px_per_mm, opti_params,
+            plot.generate_figure(img, cnt, px_per_mm, opti_params,
                                         prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
 
     sys.exit(0)
