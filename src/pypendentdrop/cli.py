@@ -6,6 +6,18 @@ import sys
 import argparse
 from . import logfacility
 
+
+def is_valid_float(element: any) -> bool:
+    if element is None:
+        return False
+    try:
+        if float(element) < 0:
+            warning('The number cannot be negative !?')
+            return False
+        return True
+    except ValueError:
+        warning(f'This is not a number: {element}')
+        return False
 def main():
     testdata_filepath = './assets/test_data/water_dsc1884.tif'
     testdata_pxldensity = str(57.0)
@@ -48,27 +60,40 @@ def main():
 
     logfacility.set_verbose(args.v)
 
+    ### Getting the image
     imagefile = args.n
-    if imagefile is None:
-        logger.error(f'No image file provided.')
-        logger.error(f'Use -n to specify the image you want to analyze (e.g. -n image.tif)')
-        logger.error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
-        logger.error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
-        sys.exit(101)
-
     logger.debug(f'Image path provided: {imagefile}')
-
-    px_per_mm = args.p
-    if px_per_mm is None:
-        logger.error(f'No pixel density provided.')
-        logger.error(f'Use -p to specify the pixel density, in mm/px (e.g. -p {testdata_pxldensity})')
-        logger.error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
-        sys.exit(102)
-
-    logger.debug(f'Pixel density provided: {px_per_mm} px/mm')
+    if imagefile is None:
+        logger.info(f'No image file provided.')
+        logger.info(f'You can use the -n option to specify the image you want to analyze.')
+        logger.info(f'Example: pypendantdrop-cli -n image.tif)')
 
     import_success, img = import_image(imagefile)
+    while not import_success:
+        if imagefile is None:
+            print('No image file provided.')
+        print('Please provide a valid path for the image you want to analyze')
+        imagefile:str = str(input('Image file path: '))
+        logger.debug(f'Image path provided: {imagefile}')
+        import_success, img = import_image(imagefile)
 
+    ### Getting the pixel density
+    px_per_mm = args.p
+    logger.debug(f'Pixel density provided: {px_per_mm} px/mm')
+    if px_per_mm is None:
+        logger.info(f'No pixel density provided.')
+        logger.info(f'You can use the -p option specify the pixel density, in px/mm.')
+        logger.info(f'Example: pypendantdrop-cli -p 57.0)')
+
+    while not(is_valid_float(px_per_mm)):
+        if px_per_mm is None:
+            print('No pixel density provided.')
+        print('Please provide a valid pixel density for the image you want to analyze')
+        px_per_mm:str = str(input('Pixel density (px/mm): '))
+        logger.debug(f'Pixel density provided: {px_per_mm} px/mm')
+    px_per_mm:float = float(px_per_mm)
+
+    import_success, img = import_image(imagefile)
     if import_success:
         logger.debug(f'Import image successful.')
     else:
@@ -80,7 +105,6 @@ def main():
 
     roi = format_roi(img, [args.tlx, args.tly, args.brx, args.bry])
     logger.debug(f'roi = {roi}')
-
 
     threshold = args.t
     if threshold is None:
@@ -118,8 +142,17 @@ def main():
     initial_parameters.set_l_mm(args.li or estimated_parameters.get_l_mm())
     initial_parameters.describe(printfn=debug, name='initial')
 
-
     logger.debug(f'chi2: {compute_gap_dimensionless(cnt, parameters=initial_parameters)}')
+
+
+    if args.o is not None:
+        from . import plot
+
+        plot.generate_figure(img, cnt, parameters=initial_parameters,
+                             prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
+    else:
+        pass
+        # info('You did not ask for graphs to be generated')
 
     to_fit = [args.af, args.xf, args.yf, args.rf, args.lf]
 
@@ -128,30 +161,38 @@ def main():
     opti_success, opti_params = optimize_profile(cnt, parameters_initialguess=initial_parameters, to_fit=to_fit,
                                                  method=None)
 
-    if opti_success:
+    if not opti_success:
+        logger.warning('Optimization failed :( Falling back to the estimated parameters.')
+        sys.exit(-2)
+    else:
         opti_params.describe(printfn=info, name='optimized')
 
         logger.debug(f'chi2: {compute_gap_dimensionless(cnt, parameters=opti_params)}')
-    else:
-        logger.warning('Optimization failed :( Falling back to the estimated parameters.')
 
+        print(f'Capillary length: {round(opti_params.get_l_mm(), 3)} mm')
+        print(f'Bond number: {round(opti_params.get_bond(), 3)}')
 
-    print(f'Bond number: {round(opti_params.get_bond(), 3)}')
+        ### Getting the contrast density
+        rhog = args.g
+        logger.debug(f'Density contrast provided: {rhog} px/mm')
+        if rhog is None:
+            logger.info(f'No density contrast provided.')
+            logger.info(f'You can use the -g option specify the density contrast (density difference times g).')
+            logger.info(f'Example (for water): pypendantdrop-cli -g 9.81)')
 
-    rhog = args.g
-    if rhog is None:
-        logger.error(f'No density contrast provided, could not compute surface tension.')
-        logger.error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
-    else:
+        while not(is_valid_float(rhog)):
+            if rhog is None:
+                print('No density contrast provided.')
+            print('Please provide a valid density contrast for the image you want to analyze')
+            rhog:str = str(input('Density contrast: '))
+            logger.debug(f'Density contrast provided: {rhog}')
+        rhog:float = float(rhog)
+
         opti_params.set_densitycontrast(rhog)
         print(f'Surface tension gamma: {round(opti_params.get_surface_tension(), 3)} mN/m')
 
-    if args.o is not None:
-        from . import plot
-
-        plot.generate_figure(img, cnt, parameters=initial_parameters,
-                             prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
-        if opti_success:
+        if args.o is not None:
+            from . import plot
             plot.generate_figure(img, cnt, parameters=opti_params,
                                  prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
 

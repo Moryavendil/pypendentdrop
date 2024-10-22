@@ -27,7 +27,8 @@ def import_image(filePath:Optional[str] = None) -> Tuple[bool, np.ndarray]:
                 data = np.mean(data, axis=2)
             success = True
         except:
-            warning(f'import_image: Could not import the image at {filePath}')
+            # todo: add precise reason why it did not work
+            warning(f'pypendentdrop.import_image: Could not import the image at path "{filePath}"')
     if not success:
         data = np.random.randint(0, 255, (128, 128))
     trace(f'import_image: Imported image {filePath} with success: {success}')
