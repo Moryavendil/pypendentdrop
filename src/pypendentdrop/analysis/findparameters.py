@@ -99,7 +99,7 @@ class Parameters():
         return None if (self._r_px is None or self._l_px is None) else self._r_px / self._l_px
 
     def get_fitparams(self) -> Fitparams:
-        return [self.get_a_rad(), self.get_y_px(), self.get_x_px(), self.get_r_mm(), self.get_l_mm()]
+        return [self.get_a_rad(), self.get_x_px(), self.get_y_px(), self.get_r_px(), self.get_l_px()]
 
 
 
@@ -389,13 +389,12 @@ def integrated_contour(parameters:Parameters) -> Tuple[np.ndarray, np.ndarray]:
 #compare computed profile to real profile
 def compare_profiles(contour:np.ndarray, parameters:Parameters) -> float:
     fitparams:Fitparams = parameters.get_fitparams()
-    px_per_mm = parameters.get_px_density()
 
-    return chi2(fitparams=fitparams, contour=contour, px_per_mm=px_per_mm)
-def chi2(fitparams:Fitparams, contour, px_per_mm:float) -> float:
-    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
+    return dimensionless_difference(fitparams=fitparams, contour=contour)
+def dimensionless_difference(fitparams:Fitparams, contour) -> float:
+    gravity_angle, x_tip_position, y_tip_position, r0_px, capillary_length_px = fitparams
 
-    tipRadius = r0_mm / capillary_length_mm
+    tipRadius = r0_px / capillary_length_px
 
     # hence the profile
     R, Z = compute_nondimensional_profile(tipRadius)
@@ -408,7 +407,7 @@ def chi2(fitparams:Fitparams, contour, px_per_mm:float) -> float:
     XY[1] -= y_tip_position
 
     #  rotating and scaling
-    XY = rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / (capillary_length_mm * px_per_mm))
+    XY = rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / capillary_length_px)
 
     # # cutting off :
     # XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)
@@ -464,7 +463,6 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
                       (0, None)] # capillary length (mm)
 
     fitparams_initial = parameters_initialguess.get_fitparams()
-    px_per_mm = parameters_initialguess.get_px_density()
 
     bounds = [default_bounds[i] if to_fit[i] else (fitparams_initial[i], fitparams_initial[i]) for i in range(len(fitparams_initial))]
 
@@ -480,14 +478,13 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
     # pendent drop uses Powell's method with maxiter = 100 (typically maxiter = 10),
     # but I found the Nelder-Mead algorithm to be 25% faster ?
     # for method = Nelder-Mead, options={'adaptive':False, 'disp':False}
-    trace(f'px_per_mm: {px_per_mm}')
     trace(f'Fitparams initial: {[round(fpi, 5) for fpi in fitparams_initial]}')
     trace(f'Bounds: {bounds}')
     trace(f'Contour shape: {contour.shape} (min-max = {contour.min()}-{contour.max()})')
     trace(f'Optimization: {method} method (options: {options})')
 
     t1 = time.time()
-    minimization = minimize(chi2, x0=np.array(fitparams_initial), args=(contour_opti, px_per_mm),
+    minimization = minimize(dimensionless_difference, x0=np.array(fitparams_initial), args=(contour_opti),
                             bounds=bounds, method=method, options=options)
     t2 = time.time()
     debug(f'optimize_profile: Optimisation time: {int((t2-t1)*1000)} ms')
@@ -508,9 +505,9 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
     parameters_opti.set_px_density(parameters_initialguess.get_px_density())
     parameters_opti.set_densitycontrast(parameters_initialguess.get_densitycontrast())
     parameters_opti.set_a_rad(minimization.x[0])
-    parameters_opti.set_x_px(minimization.x[2])
-    parameters_opti.set_y_px(minimization.x[1])
-    parameters_opti.set_r_mm(minimization.x[3])
-    parameters_opti.set_l_mm(minimization.x[4])
+    parameters_opti.set_x_px(minimization.x[1])
+    parameters_opti.set_y_px(minimization.x[2])
+    parameters_opti.set_r_px(minimization.x[3])
+    parameters_opti.set_l_px(minimization.x[4])
 
     return True, parameters_opti

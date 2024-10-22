@@ -59,11 +59,10 @@ def plot_difference(axtop, axbot, contour, parameters:Parameters, comment=''):
     axtop.set_title(f'Comparison of detected contour and computed profile')
 
     fitparams:Fitparams = parameters.get_fitparams()
-    px_per_mm = parameters.get_px_density()
 
-    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
+    gravity_angle, x_tip_position, y_tip_position, r0_px, capillary_length_px = fitparams
 
-    tipRadius = r0_mm / capillary_length_mm
+    tipRadius = r0_px / capillary_length_px
 
     # hence the profile
     R, Z = compute_nondimensional_profile(tipRadius)
@@ -76,7 +75,7 @@ def plot_difference(axtop, axbot, contour, parameters:Parameters, comment=''):
     XY[1] -= y_tip_position
 
     #  rotating and scaling
-    XY = rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / (capillary_length_mm * px_per_mm))
+    XY = rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / capillary_length_px)
 
     # # cutting off :
     # XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)
