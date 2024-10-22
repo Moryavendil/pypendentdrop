@@ -9,7 +9,6 @@ testdata_pxldensity = 57.0
 testdata_rhog = 9.81
 testdata_roi = [10, 90, 300, 335]
 
-ppd.logger.trace(f'Importing image {testdata_filepath}')
 success, img = ppd.import_image(testdata_filepath)
 
 if not success:

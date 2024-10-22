@@ -15,7 +15,7 @@ plt.rcParams.update({'font.family': 'serif', 'font.size': 10,
                      'axes.labelsize': 10,'axes.titlesize': 12,
                      'legend.fontsize': 10})
 
-def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float, fitparams:Fitparams, comment='', roi=None):
+def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, parameters:Parameters, comment='', roi=None):
     roi = format_roi(image, roi)
     roi[2] = roi[2] or image.shape[1]
     roi[3] = roi[3] or image.shape[0]
@@ -26,22 +26,25 @@ def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float
     xcontour, ycontour = contour[0], contour[1]
     ax.plot(xcontour, ycontour, c='lime', lw=2, label='Detected contour')
 
-    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
+    gravity_angle = parameters.get_a_rad()
+    x_tip_position, y_tip_position = parameters.get_xy_px()
 
     l = max(image.shape)
     ax.plot((x_tip_position + l * np.sin(-gravity_angle), x_tip_position - l * np.sin(-gravity_angle)), (y_tip_position - l * np.cos(-gravity_angle), y_tip_position + l * np.cos(-gravity_angle)),
             color='b', lw=2, ls='--', label=f'Direction of gravity')
 
-    drop_center_x = x_tip_position + r0_mm * px_per_mm * np.sin(-gravity_angle)
-    drop_center_y = y_tip_position - r0_mm * px_per_mm * np.cos(-gravity_angle)
-    e1 = patches.Arc((drop_center_x, drop_center_y), 2 * r0_mm * px_per_mm, 2 * r0_mm * px_per_mm,  # WARNING CONVENTION
+    ax.scatter(x_tip_position, y_tip_position, s=50, fc='k', ec='lime', linewidths=2, label=f'Tip position', zorder=4)
+
+    r0_px = parameters.get_r_px()
+
+    drop_center_x = x_tip_position + r0_px * np.sin(-gravity_angle)
+    drop_center_y = y_tip_position - r0_px * np.cos(-gravity_angle)
+    e1 = patches.Arc((drop_center_x, drop_center_y), 2 * r0_px, 2 * r0_px,  # WARNING CONVENTION
                      theta1 = 0 - gravity_angle*180/np.pi, theta2 = 180 - gravity_angle*180/np.pi,
                      linewidth=2, fill=False, zorder=2, color='darkred', ls='--', label=f'Curvature')
     ax.add_patch(e1)
 
-    Rd, Zd = integrated_contour(px_per_mm, fitparams)
-
-    ax.scatter(x_tip_position, y_tip_position, s=50, fc='k', ec='lime', linewidths=2, label=f'Tip position', zorder=4)
+    Rd, Zd = integrated_contour(parameters)
 
     ax.plot(Rd, Zd, c='r', lw=2, label=f'Computed profile')
 
@@ -51,9 +54,12 @@ def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, px_per_mm:float
     ax.set_ylabel('y [px]')
     ax.set_ylim(image.shape[0], 0)
 
-def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:Fitparams, comment=''):
+def plot_difference(axtop, axbot, contour, parameters:Parameters, comment=''):
     # axtop.set_title(f'chi2: {analyze.compare_profiles(fitparams, contour, px_per_mm=px_per_mm)}')
     axtop.set_title(f'Comparison of detected contour and computed profile')
+
+    fitparams:Fitparams = parameters.get_fitparams()
+    px_per_mm = parameters.get_px_density()
 
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
 
@@ -72,8 +78,9 @@ def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:Fitparams, comme
     #  rotating and scaling
     XY = rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / (capillary_length_mm * px_per_mm))
 
-    # cutting off :
-    XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)
+    # # cutting off :
+    # XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)
+
 
     # separating the two sides
     rightside = XY[0] > 0
@@ -87,12 +94,15 @@ def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:Fitparams, comme
     R1 = np.interp(Y1, Z, R) # the radius corresponding to the side 1
     R2 = np.interp(Y2, Z, R) # the radius corresponding to the side 2
 
+    R1[Y1 > Z.max()] = R[np.argmax(Z)]
+    R2[Y2 > Z.max()] = R[np.argmax(Z)]
+
     R1[Y1 < Z.min()] *= 0
     R2[Y2 < Z.min()] *= 0
     DX1 = X1 - R1
     DX2 = X2 - R2
 
-    chi2 = np.abs(trapezoid(DX1**2, Y1)) + np.abs(trapezoid(DX2**2, Y2))
+    difference = np.abs(trapezoid(DX1**2, Y1)) + np.abs(trapezoid(DX2**2, Y2))
     # print(f'DGB: CHI2: {chi2}')
 
     ### AX ON TOP
@@ -129,7 +139,7 @@ def plot_difference(axtop, axbot, contour, px_per_mm, fitparams:Fitparams, comme
     # axbot.tick_params(axis='y', colors='gray')
     # axbot.xaxis.label.set_color('gray')
 
-def generate_figure(data, contour, px_per_mm, parameters, prefix=None, comment=None, suffix=None, filetype='pdf', roi=None):
+def generate_figure(data, contour, parameters:Parameters, prefix=None, comment=None, suffix=None, filetype='pdf', roi=None):
     if prefix is None:
         prefix= ''
     if suffix is None:
@@ -138,8 +148,8 @@ def generate_figure(data, contour, px_per_mm, parameters, prefix=None, comment=N
         comment=''
     plt.figure()
     ax = plt.subplot(1, 2, 1)
-    plot_image_contour(ax, data, contour, px_per_mm, parameters, comment=comment, roi=roi)
+    plot_image_contour(ax, data, contour, parameters, comment=comment, roi=roi)
     ax1, ax2 = plt.subplot(2, 2, 2), plt.subplot(2, 2, 4)
-    plot_difference(ax1, ax2, contour, px_per_mm, parameters)
+    plot_difference(ax1, ax2, contour, parameters)
     prefix = f'{prefix}{suffix}'
     plt.savefig(prefix + '.' + filetype, dpi=300)

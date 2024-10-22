@@ -7,29 +7,103 @@ import time
 
 from .. import error, warning, info, debug, trace
 
-
 Fitparams = List[float]
+def roundifnotnone(val:Optional[float], digits=2, unit=None):
+    return None if val is None else f"{round(val, digits)}{'' if unit is None else ' '+unit}"
+class Parameters():
+    RAD_PER_DEG = np.pi/180
+    DEG_PER_RAD = 180/np.pi
+
+    def __init__(self):
+        self._a_rad: Optional[float] = None
+        self._x_px: Optional[float] = None
+        self._y_px: Optional[float] = None
+        self._r_px: Optional[float] = None
+        self._l_px: Optional[float] = None
+
+        self._px_per_mm: Optional[float] = None
+        self._rhog: Optional[float] = None
+
+    def __repr__(self) -> str:
+        return f""" 
+        pixel density: {roundifnotnone(self.get_px_density(), digits=2, unit='px/mm')}
+        rho g: {roundifnotnone(self.get_densitycontrast(), digits=3)}
+        -----
+        gravity_angle: {roundifnotnone(self.get_a_deg(), digits=2, unit='deg')} ({roundifnotnone(self.get_a_rad(), digits=4, unit='rad')})
+        x_tip_position: {roundifnotnone(self.get_x_px(), digits=2, unit='px')}
+        y_tip_position: {roundifnotnone(self.get_y_px(), digits=2, unit='px')}
+        r0: {roundifnotnone(self.get_r_mm(), digits=4, unit='mm')} ({roundifnotnone(self.get_r_px(), digits=2, unit='px')})
+        capillary_length: {roundifnotnone(self.get_l_mm(), digits=4, unit='mm')} ({roundifnotnone(self.get_l_px(), digits=2, unit='px')})
+        """
+    def __str__(self) -> str:
+        return f"Parameters (a={self.get_a_deg()} deg; x={self.get_x_px()} px; y={self.get_y_px()} px; r={self.get_r_mm()} mm; l={self.get_l_mm()} mm)"
+
+    def describe(self, printfn=print, name = None):
+        printfn(f"Parameters {'' if name is None else ('(' + name + ')')}" + repr(self))
+
+    def set_px_density(self, pixel_density:float) -> None:
+        self._px_per_mm = pixel_density
+    def get_px_density(self) -> float:
+        return self._px_per_mm
+    def set_px_spacing(self, pixel_spacing:float) -> None:
+        self._px_per_mm = None if pixel_spacing is None else 1/pixel_spacing
+    def get_px_spacing(self) -> float:
+        return None if self._px_per_mm is None else 1/self._px_per_mm
+
+    def set_densitycontrast(self, rhog:float) -> None:
+        self._rhog = rhog
+    def get_densitycontrast(self) -> float:
+        return self._rhog
+
+    def set_a_rad(self, gravity_angle_rad:float) -> None:
+        self._a_rad = gravity_angle_rad
+    def get_a_rad(self) -> float:
+        return self._a_rad
+    def set_a_deg(self, gravity_angle_deg:float) -> None:
+        self._a_rad = None if gravity_angle_deg is None else gravity_angle_deg * self.RAD_PER_DEG
+    def get_a_deg(self) -> float:
+        return None if self._a_rad is None else self._a_rad * self.DEG_PER_RAD
+
+    def set_x_px(self, x_tip_position_px:float) -> None:
+        self._x_px = x_tip_position_px
+    def get_x_px(self) -> float:
+        return self._x_px
+    def set_y_px(self, y_tip_position_px:float) -> None:
+        self._y_px = y_tip_position_px
+    def get_y_px(self) -> float:
+        return self._y_px
+    def set_xy_px(self, xy_tip_position_px:float) -> None:
+        self._x_px, self._y_px = xy_tip_position_px
+    def get_xy_px(self) -> Tuple[float, float]:
+        return (self._x_px, self._y_px)
+
+    def set_r_px(self, r0_px:float) -> None:
+        self._r_px = r0_px
+    def get_r_px(self) -> float:
+        return self._r_px
+    def set_r_mm(self, r0_mm:float) -> None:
+        self._r_px = None if (r0_mm is None or self._px_per_mm is None) else r0_mm * self._px_per_mm
+    def get_r_mm(self) -> float:
+        return None if (self._px_per_mm is None or self._r_px is None) else self._r_px / self._px_per_mm
+
+    def set_l_px(self, lcap_px:float) -> None:
+        self._l_px = lcap_px
+    def get_l_px(self) -> float:
+        return self._l_px
+    def set_l_mm(self, lcap_mm:float) -> None:
+        self._l_px = None if (lcap_mm is None or self._px_per_mm is None) else lcap_mm * self._px_per_mm
+    def get_l_mm(self) -> float:
+        return None if (self._px_per_mm is None or self._l_px is None) else self._l_px / self._px_per_mm
+
+    def get_dimensionlessTipRadius(self):
+        return None if (self._r_px is None or self._l_px is None) else self._r_px / self._l_px
+
+    def get_fitparams(self) -> Fitparams:
+        return [self.get_a_rad(), self.get_y_px(), self.get_x_px(), self.get_r_mm(), self.get_l_mm()]
+
+
 
 # paremeters
-def talk_params(fitparams:Fitparams, px_per_mm:float, talkfn=print, name=None) -> None:
-    """
-    Mainly a debug function, this displays the value of the parameters in a human readable form in the console.
-
-    :param fitparams:
-    :param px_per_mm:
-    :return:
-    """
-    if name is None:
-        name = 'Current'
-    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
-    talkfn(f'{name} parameters:')
-    talkfn(f'\t\tpx_per_mm: {round(px_per_mm, 2) if px_per_mm is not None else None} px/mm')
-    talkfn(f'\t\tgravity_angle: {round(gravity_angle * 180 / np.pi, 2) if gravity_angle is not None else None} deg')
-    talkfn(f'\t\tx_tip_position: {round(x_tip_position, 2) if x_tip_position is not None else None} px')
-    talkfn(f'\t\ty_tip_position: {round(y_tip_position, 2) if y_tip_position is not None else None} px')
-    talkfn(f'\t\tr0: {round(r0_mm, 3) if r0_mm is not None else None} mm (= {round(r0_mm * px_per_mm, 1) if r0_mm is not None else None} px)')
-    talkfn(f'\t\tcapillary_length: {round(capillary_length_mm, 3) if capillary_length_mm is not None else None} mm')
-
 def image_centre(image:np.ndarray) -> np.ndarray:
     """
     Returns the (x, y) coordinates of the center of an image (around which it is pertinent to rotate the contour).
@@ -58,22 +132,20 @@ def rotate_and_scale(contour, angle:float=0., centre:Optional[Union[Tuple, List,
     """
     Rotates and/or scales a contour around a center **centre**.
 
-    :param contour:
-    :param angle:
-    :param centre:
+    :param contour: shape (2, N)
+    :param angle: angle, in radians
+    :param centre: coordinates (x, y), in px
     :param scalefactor:
     :return:
     """
     if centre is None: # centre of rotation
         centre = (0, 0)
     rot_mat = getrotationandscalematrix(centre, angle=angle, scalefactor=scalefactor)
-    # print(f'DBG: rot_mat {rot_mat.shape}:', rot_mat)
-    # print(f'DBG: Contour shape: {np.array(contour).shape}')
     x_rotated = rot_mat[0,0] * contour[0] + rot_mat[0, 1] * contour[1] + rot_mat[0, 2]
     y_rotated = rot_mat[1,0] * contour[0] + rot_mat[1, 1] * contour[1] + rot_mat[1, 2]
     return x_rotated, y_rotated
 
-def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Fitparams:
+def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Parameters:
     """
     Estimates the parameters crudely using (hopefully) robust techniques.
 
@@ -94,25 +166,23 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Fitparam
         def dist(abc, contour:np.ndarray) -> float:
             return np.sum((abc[0]*contour[1] + abc[1]*contour[0] +abc[2])**2/(abc[0]**2+abc[1]**2))
 
-        # print(f'DBG: Initial slope (numpy): {slope}, dist = {np.sqrt(dist(abc0, contour))}')
 
         bestline = minimize(dist, abc0, args=(contour))
         a, b, c = bestline.x
 
-        # print(f'DBG: Slope (best line): {-a/b}, dist = {np.sqrt(dist(bestline.x, contour))}')
 
         gravity_angle = np.arctan(-a/b)
         # we do a trick to have the angle between -90 and 90 deg
         gravity_angle = (np.pi/2 + np.arctan2(-a, b))%(np.pi) - np.pi/2
 
         if np.abs(gravity_angle*180/np.pi) > 60:
-            print(f'WARN: the angle of gravity was detected to {round(gravity_angle*180/np.pi, 2)} deg.')
-            print(f'WARN: This is likely an error so I put it to 0.')
+            warning(f'WARN: the angle of gravity was detected to {round(gravity_angle*180/np.pi, 2)} deg.')
+            warning(f'WARN: This is likely an error so I put it to 0.')
             gravity_angle = 0
     except:
-        print("WARN: couldn't get gravity angle. Falling back to", gravity_angle)
+        warning(f"WARN: couldn't get gravity angle. Falling back to {gravity_angle}")
 
-    # print(f"gravity angle (initial estimate) = {initial_estimate_parameters['gravity_angle']*180/np.pi} deg")
+    trace(f"\tFound gravity_angle={gravity_angle*180/np.pi} deg")
 
     # Now we need to rotate the contour in order to correctly estimate the other parameters
     contour_tiltcorrected = rotate_and_scale(contour, angle=-gravity_angle, centre=image_centre)
@@ -127,14 +197,32 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Fitparam
     x_tip_position, y_tip_position = rotate_and_scale([x_tip_position_tiltcorrected, y_tip_position_tiltcorrected],
                                                       angle=gravity_angle, centre=image_centre)
 
-
-    # print(f"y tip position (initial estimate) = {initial_estimate_parameters['y_tip_position']} px")
-    # print(f"x tip position (initial estimate) = {initial_estimate_parameters['x_tip_position']} px")
+    trace(f"\tFound x_tip_position={x_tip_position} px")
+    trace(f"\tFound y_tip_position={y_tip_position} px")
 
     ### Radius of curvature
+    De = contour_tiltcorrected[0].max() - contour_tiltcorrected[0].min()
 
-    # coarse estimate using the tilt-corrected contour : max radius of the drop
-    r0_px_coarse = (contour_tiltcorrected[0].max() - contour_tiltcorrected[0].min()) / 2
+    right = contour_tiltcorrected[0] > x_tip_position_tiltcorrected
+    left = np.bitwise_not(right)
+    Ds_height = y_tip_position_tiltcorrected - De
+    x_ds_r = contour_tiltcorrected[0][right][np.argmin((contour_tiltcorrected[1][right] - Ds_height)**2)]
+    x_ds_l = contour_tiltcorrected[0][left][np.argmin((contour_tiltcorrected[1][left] - Ds_height)**2)]
+    Ds = x_ds_r - x_ds_l
+
+    # Method 1: coarse estimate : max radius of the drop
+    r0_px_coarse = De / 2
+    # Method 2 : using the ugly formulas
+    sigma = De/Ds
+    bond = 0.12836 - 0.7577*sigma + 1.7713*sigma**2 - 0.5426*sigma**3
+    ratio = 0.9987 + 0.1971 * bond - 0.0734 * bond**2 + 0.34708*bond**3
+    r0_px_fine = De / (2 * ratio)
+
+    # trace(f'De: {De} | Ds = {Ds}')
+    # trace(f'sigma: {sigma} | bond2 = {bond}')
+
+    # Method 3 : using a fit
+    r0_px_fit = r0_px_coarse
     try:
         # finer estimation : we take the points near the tip (at a distance < r0_estimation_radius, in px) and do a 2nd order polynomial fitparams_handpicked
         r0_estimation_radius = r0_px_coarse/4 # this is tipNeighbourhood is pendent drop
@@ -142,20 +230,32 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Fitparam
         x_contour_neartip = contour_tiltcorrected[0][nearthetip]
         y_contour_neartip  = contour_tiltcorrected[1][nearthetip]
         curvature_px = np.polyfit(x_contour_neartip, y_contour_neartip, 2)[0]
-        r0_px = np.abs(1/curvature_px)/2
+        r0_px_fit = np.abs(1/curvature_px)/2
     except:
-        r0_px = r0_px_coarse
-    r0_mm = r0_px / px_per_mm
+        debug('Fit failed')
 
-    # print(f"r0 (initial estimate) = {initial_estimate_parameters['r0']} mm")
+    # trace(f"\tr0= {round(r0_px_coarse, 2)} px [coarse] / {round(r0_px_fine, 2)} px [fine] / {round(r0_px_fit, 2)} px [fit] ")
+    trace(f"\tr0= {round(r0_px_coarse/px_per_mm, 2)} mm [coarse] / {round(r0_px_fine/px_per_mm, 2)} mm [fine] / {round(r0_px_fit/px_per_mm, 2)} mm [fit] ")
 
-    capillary_length_mm:float = 2.7 # clueless guess : the fluid is pure water
+    # lcap_px_coarse = np.sqrt(r0_px_coarse**2 / bond)
+    # lcap_px_fine = np.sqrt(r0_px_fine**2 / bond)
+    # lcap_px_fit = np.sqrt(r0_px_fit**2 / bond)
+    # trace(f"\tlcap= {round(lcap_px_coarse/px_per_mm, 2)} mm [coarse] / {round(lcap_px_fine/px_per_mm, 2)} mm [fine] / {round(lcap_px_fit/px_per_mm, 2)} mm [fit] ")
 
-    fitparams_init = [gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm]
+    lcap_px_clueless:float = 2.7*px_per_mm # clueless guess : the fluid is pure water
+    lcap_px = lcap_px_clueless
 
-    talk_params(fitparams_init, px_per_mm=px_per_mm, talkfn=trace, name='estimate_parameter: Result of estimation')
+    params_estimated = Parameters()
+    params_estimated.set_px_density(px_per_mm)
+    params_estimated.set_a_rad(gravity_angle)
+    params_estimated.set_x_px(x_tip_position)
+    params_estimated.set_y_px(y_tip_position)
+    params_estimated.set_r_px(r0_px_fit)
+    params_estimated.set_l_px(lcap_px)
 
-    return fitparams_init
+    params_estimated.describe(printfn=trace, name='(estimation)')
+
+    return params_estimated
 
 ### profile computing
 
@@ -208,8 +308,6 @@ def compute_nondimensional_profile(tipRadius:float, ds:float = 1e-3, approxLimit
     if zMax is None:
         zMax = greater_possible_zMax(tipRadius)
 
-    # print('Compute ND profile for tipRadius=', tipRadius)
-
     ### NEAR THE TIP (singularity handling by asymptotic development)
 
     # curvilinear coordinate where we switch from the approximate solution to integration
@@ -250,7 +348,7 @@ def compute_nondimensional_profile(tipRadius:float, ds:float = 1e-3, approxLimit
 
     return RPKZ[:, 0], RPKZ[:, 3]
 
-def integrated_contour(px_per_mm:float, fitparams:Fitparams) -> Tuple[np.ndarray, np.ndarray]:
+def integrated_contour(parameters:Parameters) -> Tuple[np.ndarray, np.ndarray]:
     """
     Gives the computed profile in pixel coordinates.
 
@@ -258,9 +356,11 @@ def integrated_contour(px_per_mm:float, fitparams:Fitparams) -> Tuple[np.ndarray
     :param fitparams:
     :return: The computed profile in pixel coordinates
     """
-    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
 
-    tipRadius = r0_mm / capillary_length_mm
+    tipRadius = parameters.get_dimensionlessTipRadius()
+    x_tip_position, y_tip_position = parameters.get_xy_px()
+    gravity_angle = parameters.get_a_rad()
+    caplength_px = parameters.get_l_px()
 
     # hence the profile
     R, Z = compute_nondimensional_profile(tipRadius)
@@ -278,7 +378,7 @@ def integrated_contour(px_per_mm:float, fitparams:Fitparams) -> Tuple[np.ndarray
     Zdim *= -1
     # scaling (first by capillary length to dimensionalize, then by pizel size to fit the image)
     # rotate, around the tip at (0,0)
-    Rdim, Zdim = rotate_and_scale([Rdim, Zdim], angle=gravity_angle, scalefactor=capillary_length_mm * px_per_mm)
+    Rdim, Zdim = rotate_and_scale([Rdim, Zdim], angle=gravity_angle, scalefactor=caplength_px)
 
     # moving
     Rdim = Rdim + x_tip_position
@@ -287,8 +387,12 @@ def integrated_contour(px_per_mm:float, fitparams:Fitparams) -> Tuple[np.ndarray
     return Rdim, Zdim
 
 #compare computed profile to real profile
+def compare_profiles(contour:np.ndarray, parameters:Parameters) -> float:
+    fitparams:Fitparams = parameters.get_fitparams()
+    px_per_mm = parameters.get_px_density()
 
-def compare_profiles(fitparams:Fitparams, contour, px_per_mm:float) -> float:
+    return chi2(fitparams=fitparams, contour=contour, px_per_mm=px_per_mm)
+def chi2(fitparams:Fitparams, contour, px_per_mm:float) -> float:
     gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = fitparams
 
     tipRadius = r0_mm / capillary_length_mm
@@ -306,8 +410,9 @@ def compare_profiles(fitparams:Fitparams, contour, px_per_mm:float) -> float:
     #  rotating and scaling
     XY = rotate_and_scale(XY, angle=-gravity_angle, scalefactor=-1 / (capillary_length_mm * px_per_mm))
 
-    # cutting off :
-    XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)
+    # # cutting off :
+    # XY = np.take(XY, np.where(XY[1] < Z.max())[0], axis=1)
+
 
     # separating the two sides
     rightside = XY[0] > 0
@@ -321,19 +426,22 @@ def compare_profiles(fitparams:Fitparams, contour, px_per_mm:float) -> float:
     R1 = np.interp(Y1, Z, R) # the radius corresponding to the side 1
     R2 = np.interp(Y2, Z, R) # the radius corresponding to the side 2
 
+    R1[Y1 > Z.max()] = R[np.argmax(Z)]
+    R2[Y2 > Z.max()] = R[np.argmax(Z)]
+
     R1[Y1 < Z.min()] *= 0
     R2[Y2 < Z.min()] *= 0
     DX1 = X1 - R1
     DX2 = X2 - R2
 
-    chi2 = np.abs(trapezoid(DX1**2, Y1)) + np.abs(trapezoid(DX2**2, Y2))
-    return chi2
+    difference = np.abs(trapezoid(DX1**2, Y1)) + np.abs(trapezoid(DX2**2, Y2))
+    return difference
 
 # compute the optimal profile
 
-def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialguess:Fitparams,
+def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
                      to_fit:Optional[List[bool]]=None,
-                     maxiter:Optional[int]=None, method:Optional[str]=None) -> Tuple[bool, Fitparams]:
+                     maxiter:Optional[int]=None, method:Optional[str]=None) -> Tuple[bool, Parameters]:
     """
 
     :param contour:
@@ -355,11 +463,14 @@ def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialgues
                       (0, None),  # r0_mm
                       (0, None)] # capillary length (mm)
 
-    bounds = [default_bounds[i] if to_fit[i] else (parameters_initialguess[i], parameters_initialguess[i]) for i in range(len(parameters_initialguess))]
+    fitparams_initial = parameters_initialguess.get_fitparams()
+    px_per_mm = parameters_initialguess.get_px_density()
+
+    bounds = [default_bounds[i] if to_fit[i] else (fitparams_initial[i], fitparams_initial[i]) for i in range(len(fitparams_initial))]
 
     # we remove the top 5 pixels, i.e. the points too close to the top edge
-    gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = parameters_initialguess
-    nottooclosefromthetop = contour[1]-contour[1].min() > 5/np.cos(gravity_angle)
+    # gravity_angle = parameters_initialguess.get_a_rad()
+    nottooclosefromthetop = contour[1]-contour[1].min() > 5/np.cos(parameters_initialguess.get_a_rad())
     contour_opti = contour[:, nottooclosefromthetop]
 
     options={}
@@ -369,21 +480,37 @@ def optimize_profile(contour:np.ndarray, px_per_mm:float, parameters_initialgues
     # pendent drop uses Powell's method with maxiter = 100 (typically maxiter = 10),
     # but I found the Nelder-Mead algorithm to be 25% faster ?
     # for method = Nelder-Mead, options={'adaptive':False, 'disp':False}
+    trace(f'px_per_mm: {px_per_mm}')
+    trace(f'Fitparams initial: {[round(fpi, 5) for fpi in fitparams_initial]}')
+    trace(f'Bounds: {bounds}')
+    trace(f'Contour shape: {contour.shape} (min-max = {contour.min()}-{contour.max()})')
+    trace(f'Optimization: {method} method (options: {options})')
 
     t1 = time.time()
-    minimization = minimize(compare_profiles, x0=np.array(parameters_initialguess), args=(contour_opti, px_per_mm),
-                            bounds=bounds, method='Nelder-Mead', options=options)
+    minimization = minimize(chi2, x0=np.array(fitparams_initial), args=(contour_opti, px_per_mm),
+                            bounds=bounds, method=method, options=options)
     t2 = time.time()
-    debug(f'Optimisation time: {int((t2-t1)*1000)} ms')
+    debug(f'optimize_profile: Optimisation time: {int((t2-t1)*1000)} ms')
 
     optimization_success = minimization.success
+
+    debug(f'optimize_profile: {minimization.nit} iterations, {minimization.nfev} calls to function')
+    trace(f'optimize_profile: Minimization message: {minimization.message}')
 
     if not(minimization.success):
         info('Minimizaton failed')
         debug(f'Minimization unsuccessful: {minimization.message}')
         return False, parameters_initialguess
 
-    debug(f'Minimization successful ({minimization.nit} iterations, {minimization.nfev} calls to function)')
-    trace(f'Minimization message: {minimization.message}')
 
-    return True, minimization.x
+    # copy `by hand'
+    parameters_opti = Parameters()
+    parameters_opti.set_px_density(parameters_initialguess.get_px_density())
+    parameters_opti.set_densitycontrast(parameters_initialguess.get_densitycontrast())
+    parameters_opti.set_a_rad(minimization.x[0])
+    parameters_opti.set_x_px(minimization.x[2])
+    parameters_opti.set_y_px(minimization.x[1])
+    parameters_opti.set_r_mm(minimization.x[3])
+    parameters_opti.set_l_mm(minimization.x[4])
+
+    return True, parameters_opti
