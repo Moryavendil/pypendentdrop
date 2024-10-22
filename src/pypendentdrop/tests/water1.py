@@ -44,9 +44,7 @@ group3.add_argument('--rf', help='Fix the drop radius', action='store_false')
 group3.add_argument('--lf', help='Fix the capillary length', action='store_false')
 
 args = parser.parse_args(['-n', str(testdata_filepath), '-p', str(testdata_pxldensity), '-g', str(testdata_rhog),
-                          '--tlx', str(testdata_roi[0]), '--tly', str(testdata_roi[1]),
-                          '--brx', str(testdata_roi[2]), '--bry', str(testdata_roi[3]),
-                          '-vvv', '-o', 'water2'])
+                          '-vvv', '-o', 'water1'])
 
 if __name__ == "__main__":
     logfacility.set_verbose(args.v)
