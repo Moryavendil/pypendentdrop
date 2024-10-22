@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pypendentdrop"
+dynamic = ["version"]
+authors = [
+  { name="G2L", email="GDoubleL@proton.me" },
+]
+description = "A small example package"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+keywords = [
+"pendent", "pendant", "drop", "image", "analysis", "surface", "tension"
+]
+
+[tool.hatch.version]
+path = "src/pypendentdrop/__init__.py"
+
+[project.scripts]
+pypendentdrop-cli-test = "pypendentdrop.cli:main"
+
+[project.gui-scripts]
+pypendentdrop-gui-test = "pypendentdrop.gui.gui:main"
+
+[project.urls]
+Homepage = "https://github.com/Moryavendil/pypendentdrop"
+Issues = "https://github.com/Moryavendil/pypendentdrop/issues"
+

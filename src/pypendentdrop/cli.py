@@ -1,16 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
+from . import *
 import sys
 import argparse
 from . import logfacility
-from . import *
 
-testdata_filepath = './assets/test_data/water_dsc1884.tif'
-testdata_pxldensity = str(57.0)
-testdata_rhog = str(9.81)
-
-if __name__ == "__main__":
+def main():
+    testdata_filepath = './assets/test_data/water_dsc1884.tif'
+    testdata_pxldensity = str(57.0)
+    testdata_rhog = str(9.81)
 
     parser = argparse.ArgumentParser(
         prog='ppd_commandLine',
@@ -145,9 +141,9 @@ if __name__ == "__main__":
         from . import plot
 
         plot.generate_figure(img, cnt, px_per_mm, init_params,
-                                    prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
+                             prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
         if opti_success:
             plot.generate_figure(img, cnt, px_per_mm, opti_params,
-                                        prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
+                                 prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
 
     sys.exit(0)
