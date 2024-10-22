@@ -1,11 +1,14 @@
 import pypendentdrop as ppd
 	
-filepath = './assets/test_data/water_dsc1884.tif'
+filepath = './src/pypendentdrop/tests/testdata/water_2.tif'
 pxldensity = 57.0
 rhog = 9.812
 roi = [10, 90, 300, 335]
 
-success, img = ppd.import_image(filepath)
+importsuccess, img = ppd.import_image(filepath)
+
+if not importsuccess:
+    raise FileNotFoundError(f'Could not import image at {filepath}')
 
 threshold = ppd.best_threshold(img, roi=roi)
 
@@ -13,22 +16,25 @@ cnt = ppd.find_mainContour(img, threshold, roi=roi)
 
 estimated_parameters = ppd.estimate_parameters(ppd.image_centre(img), cnt, pxldensity)
 
-opti_success, optimized_parameters = ppd.optimize_profile(cnt, px_per_mm=pxldensity, parameters_initialguess=estimated_parameters)
+estimated_parameters.describe(name='estimated')
 
-gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = optimized_parameters
+opti_success, optimized_parameters = ppd.optimize_profile(cnt, parameters_initialguess=estimated_parameters)
 
-bond = (r0_mm / capillary_length_mm)**2
-print(f'Bond number: {round(bond, 3)}')
+if not opti_success:
+    print('optimization failed :(')
+else:
+    optimized_parameters.describe(name='optimized')
 
-gamma = rhog * capillary_length_mm**2
-print(f'Surface tension gamma: {round(gamma, 3)} mN/m')
+    print(f'Bond number: {round(optimized_parameters.get_bond(), 3)}')
 
-### Plotting a comparison between the estimated and optimized parameters
-import matplotlib.pyplot as plt
-from ppd import plotresults
+    optimized_parameters.set_densitycontrast(rhog)
+    print(f'Surface tension gamma: {round(optimized_parameters.get_surface_tension(), 3)} mN/m')
 
-fig, (ax1, ax2) = plt.subplots(1, 2)
-plotresults.plot_image_contour(ax1, img, cnt, pxldensity, estimated_parameters, 'estimated', roi=roi)
-plotresults.plot_image_contour(ax2, img, cnt, pxldensity, optimized_parameters, 'optimized', roi=roi)
+    ### Plotting a comparison between the estimated and optimized parameters
+    import matplotlib.pyplot as plt
+    from pypendentdrop import plot
 
-plt.savefig('comparison.png', dpi=300)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    plot.plot_image_contour(ax1, img, cnt, estimated_parameters, 'estimated', roi=roi)
+    plot.plot_image_contour(ax2, img, cnt, optimized_parameters, 'optimized', roi=roi)
+    plt.savefig('deleteme_comparison.png', dpi=300)

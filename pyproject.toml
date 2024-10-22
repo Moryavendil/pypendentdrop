@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [
   { name="G2L", email="GDoubleL@proton.me" },
 ]
-description = "A small example package"
+description = "Python scripts (GUI and command line) to measure surface tension from images of pendent drops."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -24,10 +24,10 @@ keywords = [
 path = "src/pypendentdrop/__init__.py"
 
 [project.scripts]
-pypendentdrop-cli-test = "pypendentdrop.cli:main"
+pypendentdrop-cli = "pypendentdrop.cli:main"
 
 [project.gui-scripts]
-pypendentdrop-gui-test = "pypendentdrop.gui.gui:main"
+pypendentdrop-gui = "pypendentdrop.gui.gui:main"
 
 [project.urls]
 Homepage = "https://github.com/Moryavendil/pypendentdrop"

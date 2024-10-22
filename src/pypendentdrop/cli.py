@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from . import *
 import sys
 import argparse
@@ -116,7 +119,7 @@ def main():
     initial_parameters.describe(printfn=debug, name='initial')
 
 
-    ppd.logger.debug(f'chi2: {ppd.compute_gap_dimensionless(cnt, parameters=initial_parameters)}')
+    logger.debug(f'chi2: {compute_gap_dimensionless(cnt, parameters=initial_parameters)}')
 
     to_fit = [args.af, args.xf, args.yf, args.rf, args.lf]
 
