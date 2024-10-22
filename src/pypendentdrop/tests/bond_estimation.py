@@ -1,4 +1,4 @@
-from ... import pypendentdrop as ppd
+import pypendentdrop as ppd
 
 from .. import logfacility
 

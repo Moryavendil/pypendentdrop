@@ -5,7 +5,7 @@ import numpy as np
 # from pyqtgraph.Qt.QtGui import QPixmap
 from pyqtgraph.Qt.QtWidgets import QMainWindow, QFileDialog
 
-from ... import pypendentdrop as ppd
+import pypendentdrop as ppd
 
 from .mainwindow_ui import Ui_PPD_MainWindow
 from .plotwidget import ppd_plotWidget

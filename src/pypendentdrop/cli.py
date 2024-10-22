@@ -95,55 +95,61 @@ def main():
 
     logger.debug(f'Drop contour: {cnt.shape[1]} points')
 
-    init_params_estimated = estimate_parameters(image_centre(img), cnt, px_per_mm)
+    estimated_parameters = estimate_parameters(image_centre(img), cnt, px_per_mm)
 
-    init_params_from_args = [args.ai, args.xi, args.yi, args.ri, args.li]
-    talk_params(init_params_from_args, px_per_mm, talkfn=trace, name='Initial (from arguments)')
+    args_parameters = Parameters()
+    args_parameters.set_px_density(px_per_mm)
+    args_parameters.set_a_deg(args.ai)
+    args_parameters.set_x_px(args.xi)
+    args_parameters.set_y_px(args.yi)
+    args_parameters.set_r_mm(args.ri)
+    args_parameters.set_l_mm(args.li)
+    args_parameters.describe(printfn=trace, name='from arguments')
 
-    init_params = []
+    initial_parameters = Parameters()
+    initial_parameters.set_px_density(px_per_mm)
+    initial_parameters.set_a_deg(args.ai or estimated_parameters.get_a_deg())
+    initial_parameters.set_x_px(args.xi or estimated_parameters.get_x_px())
+    initial_parameters.set_y_px(args.yi or estimated_parameters.get_y_px())
+    initial_parameters.set_r_mm(args.ri or estimated_parameters.get_r_mm())
+    initial_parameters.set_l_mm(args.li or estimated_parameters.get_l_mm())
+    initial_parameters.describe(printfn=debug, name='initial')
 
-    for i in range(len(init_params_estimated)):
-        init_params.append(init_params_from_args[i] or init_params_estimated[i]) # a or b if a is None
 
-    talk_params(init_params, px_per_mm, talkfn=logger.info, name='Initial')
-
-    logger.debug(f'chi2: {compute_gap_dimensionless(init_params, cnt, px_per_mm=px_per_mm)}')
+    ppd.logger.debug(f'chi2: {ppd.compute_gap_dimensionless(cnt, parameters=initial_parameters)}')
 
     to_fit = [args.af, args.xf, args.yf, args.rf, args.lf]
 
     logger.debug(f'to_fit: {to_fit}')
 
-    opti_success, opti_params = optimize_profile(cnt, px_per_mm=px_per_mm, parameters_initialguess=init_params, to_fit=to_fit)
+    opti_success, opti_params = optimize_profile(cnt, parameters_initialguess=initial_parameters, to_fit=to_fit,
+                                                 method=None)
 
     if opti_success:
-        talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
+        opti_params.describe(printfn=info, name='optimized')
 
-        logger.debug(f'chi2: {compute_gap_dimensionless(opti_params, cnt, px_per_mm=px_per_mm)}')
+        logger.debug(f'chi2: {compute_gap_dimensionless(cnt, parameters=opti_params)}')
     else:
         logger.warning('Optimization failed :( Falling back to the estimated parameters.')
 
-    r0_mm = opti_params[3]
-    caplength_mm = opti_params[4]
 
-    bond = (r0_mm / caplength_mm)**2
-
-    print(f'Bond number: {round(bond, 3)}')
+    print(f'Bond number: {round(opti_params.get_bond(), 3)}')
 
     rhog = args.g
     if rhog is None:
         logger.error(f'No density contrast provided, could not compute surface tension.')
         logger.error(f'Use -g to specify the density contrast times gravity (e.g. -g {testdata_rhog})')
     else:
-        gamma = rhog * caplength_mm**2
-        print(f'Surface tension gamma: {round(gamma, 3)} mN/m')
+        opti_params.set_densitycontrast(rhog)
+        print(f'Surface tension gamma: {round(opti_params.get_surface_tension(), 3)} mN/m')
 
     if args.o is not None:
         from . import plot
 
-        plot.generate_figure(img, cnt, px_per_mm, init_params,
+        plot.generate_figure(img, cnt, parameters=initial_parameters,
                              prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
         if opti_success:
-            plot.generate_figure(img, cnt, px_per_mm, opti_params,
+            plot.generate_figure(img, cnt, parameters=opti_params,
                                  prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
 
     sys.exit(0)
