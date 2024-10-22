@@ -19,7 +19,7 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         tlx = 0
     else:
         if not(0 <= tlx < width):
-            warning(f'TLX="{tlx}" does not verify 0 <= TLX < width. Its was overriden: TLX=0')
+            warning(f'TLX="{tlx}" does not verify 0 <= TLX < width={width}. Its was overriden: TLX=0')
             tlx = 0
 
     if tly is None:
@@ -27,7 +27,7 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         tly = 0
     else:
         if not(0 <= tly < height):
-            warning(f'TLY="{tly}" does not verify 0 <= TLY < height. Its was overriden: TLY=0')
+            warning(f'TLY="{tly}" does not verify 0 <= TLY < height={height}. Its was overriden: TLY=0')
             tly = 0
 
     if brx is None:
@@ -35,7 +35,7 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         brx = None
     else:
         if not(tlx <= brx < width):
-            warning(f'BRX="{brx}" does not verify TLX <= BRX < width. Its was overriden: BRX=None (=width)')
+            warning(f'BRX="{brx}" does not verify TLX={tlx} <= BRX < width={width}. Its was overriden: BRX=None (=width)')
             brx = None
 
     if bry is None:
@@ -43,7 +43,7 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         bry = None
     else:
         if not(tly <= bry < height):
-            warning(f'BRY="{bry}" does not verify TLY <= BRY < height. Its was overriden: BRX=None (=height)')
+            warning(f'BRY="{bry}" does not verify TLY={tly} <= BRY < height={height}. Its was overriden: BRX=None (=height)')
             brx = None
 
     trace(f'format_roi: {roi} -> {[tlx, tly, brx, bry]}')
@@ -106,8 +106,8 @@ def find_contourLines(data:np.ndarray, level:Union[int, float], roi:Roi=None) ->
     :param roi:
     :return:
     """
+    trace('find_contourLines: called')
     roi = format_roi(data, roi=roi)
-    # print('DEBUG: Generating contour lines')
 
     cont_gen = contour_generator(z=data[roi[1]:roi[3], roi[0]:roi[2]], line_type=LineType.Separate) # quad_as_tri=True
 

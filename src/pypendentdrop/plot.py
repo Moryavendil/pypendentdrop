@@ -55,7 +55,7 @@ def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, parameters:Para
     ax.set_ylim(image.shape[0], 0)
 
 def plot_difference(axtop, axbot, contour, parameters:Parameters, comment=''):
-    # axtop.set_title(f'chi2: {analyze.compare_profiles(fitparams, contour, px_per_mm=px_per_mm)}')
+    # axtop.set_title(f'chi2: {analyze.compute_gap_dimensionless(fitparams, contour, px_per_mm=px_per_mm)}')
     axtop.set_title(f'Comparison of detected contour and computed profile')
 
     fitparams:Fitparams = parameters.get_fitparams()

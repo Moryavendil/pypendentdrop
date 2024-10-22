@@ -21,10 +21,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
     def setROI(self, ROIpos, ROIsize):
         self.roi = [int(ROIpos[0]), int(ROIpos[1]),
                     int(ROIpos[0]+ROIsize[0]), int(ROIpos[1]+ROIsize[1])] # TLx, TLy, BRx, BRy
-        # print('DEBUG: Changed Roi of IsoCurveItemWithROI')
-        # print(f'DEBUG: \toffset={ROIpos}')
-        # print(f'DEBUG: \tsize={ROIsize}')
-        # print(f'DEBUG: \troi={self.roi}')
+        ppd.trace(f'isoCurve: setROI: roi is now {self.roi}')
 
         self.generatePath()
         self.update()
@@ -86,10 +83,13 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         #                                       yMin=0-max(0, (width-height)/2), yMax=height+max(0, (width-height)/2))
         
         if success:
+            self.iso.setData(self.data, level=self.defaultLevel)
+
             ROIpos = [self.imgwidth*(1-self.initialROIfract)/2, self.imgheight*(1-self.initialROIfract)/2]
             ROIsize = [self.imgwidth*self.initialROIfract, self.imgheight*self.initialROIfract]
             ROIpos = np.array(ROIpos).astype(int)
             ROIsize = np.array(ROIsize).astype(int)
+            ppd.trace(f'plotWidget: load_image: ROI position = {ROIpos} | ROI size = {ROIsize}')
             ROImaxBounds = QRectF(0-.5, 0-.5, self.imgwidth+1, self.imgheight+1)
             self.roi.maxBounds = ROImaxBounds
             self.roi.setPos(ROIpos)

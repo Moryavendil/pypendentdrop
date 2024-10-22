@@ -53,6 +53,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         self.smoothingCheckBox.setVisible(False)
         self.SmoothingDistanceLabel.setVisible(False)
         self.smoothingDistanceSpinBox.setVisible(False)
+        self.autoThresholdCheckBox.toggled.connect(self.autoThresholdToggled)
 
         ### MEASUREMENT TAB
         ## GUESS + FIT
@@ -87,7 +88,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         
         if dialog.exec():
             fileName = dialog.selectedFiles()[0]
-            print(fileName)
+            ppd.debug(f'choose_image_file: Dialog-selected file name: {fileName}')
             self.imageFileLineEdit.setText(fileName)
             
             if self.plotWidget.load_image(filepath=fileName):
@@ -110,6 +111,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         if self.ROI_BR_y_spinBox.value() != BR[1]:
             self.ROI_BR_y_spinBox.setValue(BR[1])
         self.plotWidget.iso.setROI(ROIpos, ROIsize)
+        self.autoThresholdToggled()
     
     def ROIChanged(self):
         ROI_TL_x = self.ROI_TL_x_spinBox.value()
@@ -122,19 +124,32 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         self.plotWidget.roi.setSize(ROIsize)
 
         self.plotWidget.iso.setROI(ROIpos, ROIsize)
+        self.autoThresholdToggled()
         # self.imgShowWidget.iso.offset = np.array([ROIpos[0], ROIpos[1]])
         # self.imgShowWidget.iso.setData(self.imgShowWidget.roi.getArrayRegion(self.imgShowWidget.data, self.imgShowWidget.imageItem))
-        
+
+    def autoThresholdToggled(self, autoThreshold:bool=None):
+        if autoThreshold is None:
+            autoThreshold = self.autoThresholdCheckBox.isChecked()
+        if autoThreshold:
+            threshold = ppd.best_threshold(self.plotWidget.iso.data, self.plotWidget.iso.roi)
+            self.customThresholdSpinBox.setValue(threshold)
+        self.thresholdChanged()
+
     def thresholdMoved(self):
         level = self.plotWidget.isoCtrlLine.value()
         if self.customThresholdSpinBox.value() != level:
             self.customThresholdSpinBox.setValue(level)
+            self.thresholdChanged()
         
-    def thresholdChanged(self, level = 127):
-        if self.plotWidget.isoCtrlLine.value() != level:
-            self.plotWidget.isoCtrlLine.setValue(level)
+    def thresholdChanged(self, threshold:int = None):
+        if threshold is None:
+            threshold=self.customThresholdSpinBox.value()
+        if self.plotWidget.isoCtrlLine.value() != threshold:
+            self.plotWidget.isoCtrlLine.setValue(threshold)
         
-        self.plotWidget.iso.setLevel(level)
+        if self.plotWidget.iso.level != threshold:
+            self.plotWidget.iso.setLevel(threshold)
 
     ### ESTIMATE PARAMETERS
 
@@ -224,10 +239,8 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
             threshold = self.customThresholdSpinBox.value()
 
             mainContour = self.plotWidget.isoCurve_level(level=threshold)
-            # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
             imagecentre = ppd.image_centre(np.array(self.plotWidget.iso.data))
-            # print('DEBUG:', f'image centre (rotation centre): {imagecentre}')
 
             self.parameters = ppd.estimate_parameters(imagecentre, mainContour, px_per_mm=px_per_mm)
             self.rhog_manualchange()
@@ -250,18 +263,15 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
     def optimizeParameters(self):
         if self.canComputeProfile():
 
-            # print('DEBUG OPTIMIZE PARAMETERS')
             threshold = self.customThresholdSpinBox.value()
             mainContour = self.plotWidget.isoCurve_level(level=threshold)
-            # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
             to_fit=[self.anglegCheckBox.isChecked(),
                     self.tipyCheckBox.isChecked(),
                     self.tipxCheckBox.isChecked(),
                     self.r0CheckBox.isChecked(),
                     self.caplengthCheckBox.isChecked()]
-
-            print('DEBUG:', f'To fit: {to_fit}')
+            ppd.trace(f'optimizeParameters: to_fit={to_fit} (from checkboxes)')
 
             opti_success, self.parameters = ppd.optimize_profile(mainContour, parameters_initialguess=self.parameters, to_fit=to_fit)
 

@@ -275,7 +275,8 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Paramete
     params_estimated.set_r_px(r0_px_fit)
     params_estimated.set_l_px(lcap_px)
 
-    params_estimated.describe(printfn=trace, name='(estimation)')
+    params_estimated.describe(printfn=trace, name='(estimated)')
+    debug(f'Difference between contour and estimated profile: {round(compute_gap_pixel(contour, params_estimated), 2)} px^2')
 
     return params_estimated
 
@@ -409,11 +410,15 @@ def integrated_contour(parameters:Parameters) -> Tuple[np.ndarray, np.ndarray]:
     return Rdim, Zdim
 
 #compare computed profile to real profile
-def compare_profiles(contour:np.ndarray, parameters:Parameters) -> float:
+def compute_gap_dimensionless(contour:np.ndarray, parameters:Parameters) -> float:
     fitparams:Fitparams = parameters.get_fitparams()
 
-    return dimensionless_difference(fitparams=fitparams, contour=contour)
-def dimensionless_difference(fitparams:Fitparams, contour) -> float:
+    return compute_gap_dimensionless_fromfitparams(fitparams=fitparams, contour=contour)
+def compute_gap_pixel(contour:np.ndarray, parameters:Parameters) -> float:
+    l_px = parameters.get_l_px()
+
+    return compute_gap_dimensionless(contour, parameters)**(2/3) * l_px**2
+def compute_gap_dimensionless_fromfitparams(fitparams:Fitparams, contour) -> float:
     gravity_angle, x_tip_position, y_tip_position, r0_px, capillary_length_px = fitparams
 
     tipRadius = r0_px / capillary_length_px
@@ -506,7 +511,7 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
     trace(f'Optimization: {method} method (options: {options})')
 
     t1 = time.time()
-    minimization = minimize(dimensionless_difference, x0=np.array(fitparams_initial), args=(contour_opti),
+    minimization = minimize(compute_gap_dimensionless_fromfitparams, x0=np.array(fitparams_initial), args=(contour_opti),
                             bounds=bounds, method=method, options=options)
     t2 = time.time()
     debug(f'optimize_profile: Optimisation time: {int((t2-t1)*1000)} ms')
@@ -531,5 +536,9 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
     parameters_opti.set_y_px(minimization.x[2])
     parameters_opti.set_r_px(minimization.x[3])
     parameters_opti.set_l_px(minimization.x[4])
+
+    parameters_opti.describe(printfn=trace, name='(optimized)')
+    debug(f'Difference between contour and optimized profile: {round(compute_gap_pixel(contour, parameters_opti), 2)} px^2')
+
 
     return True, parameters_opti

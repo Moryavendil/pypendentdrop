@@ -120,7 +120,7 @@ if __name__ == "__main__":
     initial_parameters.set_l_mm(args.li or estimated_parameters.get_l_mm())
     initial_parameters.describe(printfn=ppd.debug, name='initial')
 
-    ppd.logger.debug(f'chi2: {ppd.compare_profiles(cnt, parameters=initial_parameters)}')
+    ppd.logger.debug(f'chi2: {ppd.compute_gap_dimensionless(cnt, parameters=initial_parameters)}')
 
     to_fit = [args.af, args.xf, args.yf, args.rf, args.lf]
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     if opti_success:
         opti_params.describe(printfn=ppd.info, name='optimized')
 
-        ppd.logger.debug(f'chi2: {ppd.compare_profiles(cnt, parameters=opti_params)}')
+        ppd.logger.debug(f'chi2: {ppd.compute_gap_dimensionless(cnt, parameters=opti_params)}')
     else:
         ppd.logger.warning('Optimization failed :( Falling back to the estimated parameters.')
 

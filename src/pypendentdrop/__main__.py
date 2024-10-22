@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     talk_params(init_params, px_per_mm, talkfn=logger.info, name='Initial')
 
-    logger.debug(f'chi2: {compare_profiles(init_params, cnt, px_per_mm=px_per_mm)}')
+    logger.debug(f'chi2: {compute_gap_dimensionless(init_params, cnt, px_per_mm=px_per_mm)}')
 
     to_fit = [args.af, args.xf, args.yf, args.rf, args.lf]
 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     if opti_success:
         talk_params(opti_params, px_per_mm, talkfn=print, name='Optimized')
 
-        logger.debug(f'chi2: {compare_profiles(opti_params, cnt, px_per_mm=px_per_mm)}')
+        logger.debug(f'chi2: {compute_gap_dimensionless(opti_params, cnt, px_per_mm=px_per_mm)}')
     else:
         logger.warning('Optimization failed :( Falling back to the estimated parameters.')
 
