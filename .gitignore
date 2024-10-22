@@ -4,6 +4,7 @@
 *_optimalestimate.*
 # test files and misc
 deleteme_*
+perso_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
