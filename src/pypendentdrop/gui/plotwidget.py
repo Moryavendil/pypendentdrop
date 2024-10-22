@@ -67,6 +67,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         
         self.load_image(filepath=None)
         self.computedProfilePlotDataItem = None
+        self.dropTipPlotDataItem = None
         
         self._setupIsocurve()
         self._setupROI()
@@ -195,8 +196,61 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
 
         # imv_v = self.imageItem.getView()
         if self.computedProfilePlotDataItem is None:
+            # todo: replace this PlotCurveItem by a PlotDataItem (pyqtgraph recomends doing so)
             self.computedProfilePlotDataItem = pg.PlotCurveItem(x=x, y=y, pen=pg.mkPen(color='r', width=2))
             self.plot.addItem(self.computedProfilePlotDataItem)
         else:
             self.computedProfilePlotDataItem.setData(x=x, y=y)
             self.computedProfilePlotDataItem.setVisible(True)
+
+    def hide_computed_profile(self):
+        if self.computedProfilePlotDataItem is not None:
+            self.computedProfilePlotDataItem.setVisible(False)
+
+    def scatter_droptip(self, xy:Tuple[float, float]):
+        if self.dropTipPlotDataItem is None:
+            self.dropTipPlotDataItem = pg.PlotDataItem(x=[xy[0]], y=[xy[1]], symbol='o',
+                                                       symbolPen=pg.mkPen((0, 255, 0), width=3), symbolBrush=(0, 0, 0))
+
+            self.dropTipPlotDataItem.setZValue(100)
+            self.plot.addItem(self.dropTipPlotDataItem)
+        else:
+            self.dropTipPlotDataItem.setData(x=[xy[0]], y=[xy[1]])
+            self.dropTipPlotDataItem.setVisible(True)
+    def hide_scatter_droptip(self):
+        if self.dropTipPlotDataItem is not None:
+            self.dropTipPlotDataItem.setVisible(False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

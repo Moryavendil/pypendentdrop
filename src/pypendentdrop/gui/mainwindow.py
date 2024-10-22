@@ -238,7 +238,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
     ### OPTIMIZE PARAMETERS
 
-    def areParametersValid(self) -> bool:
+    def canComputeProfile(self) -> bool:
         canDoOptimization = self.parameters.can_optimize()
 
         self.optimizePushButton.setEnabled(canDoOptimization)
@@ -248,7 +248,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         return canDoOptimization
 
     def optimizeParameters(self):
-        if self.areParametersValid():
+        if self.canComputeProfile():
 
             # print('DEBUG OPTIMIZE PARAMETERS')
             threshold = self.customThresholdSpinBox.value()
@@ -271,10 +271,16 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
             self.actualizeSurfaceTension()
 
     def actualizeComputedCurve(self):
-        if self.areParametersValid():
+        if self.parameters.can_show_tip_position():
+            self.plotWidget.scatter_droptip(self.parameters.get_xy_px())
+        else:
+            self.plotWidget.hide_scatter_droptip()
+        if self.canComputeProfile():
             R, Z = ppd.integrated_contour(self.parameters)
 
             self.plotWidget.plot_computed_profile(R, Z)
+        else:
+            self.plotWidget.hide_computed_profile()
 
     ### PHYSICS
     def rhog_manualchange(self, rhog:Optional[float]=None):
@@ -284,7 +290,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         self.actualizeSurfaceTension()
 
     def actualizeSurfaceTension(self):
-        if self.areParametersValid():
+        if self.canComputeProfile():
             self.gammaSpinBox.setValue(self.parameters.get_surface_tension() or 0)
             self.bondSpinBox.setValue(self.parameters.get_bond() or 0)
 

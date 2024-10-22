@@ -101,6 +101,11 @@ class Parameters():
     def get_fitparams(self) -> Fitparams:
         return [self.get_a_rad(), self.get_x_px(), self.get_y_px(), self.get_r_px(), self.get_l_px()]
 
+    def can_show_tip_position(self) -> bool:
+        x_is_ok = not( (self.get_x_px() or 0) == 0 )
+        y_is_ok = not( (self.get_y_px() or 0) == 0 )
+        return x_is_ok * y_is_ok
+
     def can_estimate(self) -> bool:
         return not( (self.get_px_density() or 0) == 0 )
     def can_optimize(self) -> bool:
