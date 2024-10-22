@@ -17,7 +17,13 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 keywords = [
-"pendent", "pendant", "drop", "image", "analysis", "surface", "tension"
+"pendent", "pendant", "drop", "image", "analysis", "surface", "tension", "measure"
+]
+dependencies = [
+    "numpy",
+    "pillow",
+    "contourpy",
+    "scipy",
 ]
 
 [tool.hatch.version]
@@ -25,9 +31,11 @@ path = "src/pypendentdrop/__init__.py"
 
 [project.scripts]
 pypendentdrop-cli = "pypendentdrop.cli:main"
+ppd-cli = "pypendentdrop.cli:main"
 
 [project.gui-scripts]
 pypendentdrop-gui = "pypendentdrop.gui.gui:main"
+ppd-gui = "pypendentdrop.gui.gui:main"
 
 [project.urls]
 Homepage = "https://github.com/Moryavendil/pypendentdrop"

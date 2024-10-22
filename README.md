@@ -23,15 +23,32 @@ Additionnaly, the GUI version relies on
 
 The command-line version does not require Qt but relies on `matplotlib` for plotting the results when using the `-o` option.
 
-### Use the command-line version
+### Use the GUI version
+
+From a console, run 
+
+    ppd-gui
+
+or
 
     python -m pypendentdrop.gui
+
+### Use the command-line version
+
+From a console, run 
+
+    ppd-cli
+
+or
+
+    python -m pypendentdrop
 
 Use the `-h` option to list the availables options. If you use the `-o` option (graph generation), ensure that you have matplotlib installed.
 
-### Use the GUI version
+to test the module, you can run (from the main directory)
 
-    python -m pypendentdrop.gui
+    python -m pypendentdrop -n src/pypendentdrop/tests/testdata/water_2.tif -p 57 -g 9.81 -v
+
 
 ### Without installing
 
