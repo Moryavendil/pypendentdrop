@@ -1,8 +1,10 @@
+import numpy as np
+from typing import Tuple, Union, Optional, Dict, Any, List
 import pyqtgraph as pg
 from pyqtgraph.Qt.QtCore import QRectF
 from pyqtgraph.Qt import QtGui
 
-from .. import *
+from ... import pypendentdrop as ppd
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
@@ -39,7 +41,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
         data = self.data
 
         # lines = pg.isocurve(data, self.level, connected=True, extendToEdge=True)
-        lines = find_contourLines(data, self.level, roi=self.roi)
+        lines = ppd.find_contourLines(data, self.level, roi=self.roi)
         self.path = QtGui.QPainterPath()
         for line in lines:
             self.path.moveTo(*line[0])
@@ -74,7 +76,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         # self.show()
         
     def load_image(self, filepath:str = None) -> bool:
-        success, self.data = import_image(filepath)
+        success, self.data = ppd.import_image(filepath)
             
         self.imgheight, self.imgwidth = self.data.shape
         self.imageItem.clear()
@@ -187,7 +189,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         if level is None:
             level = self.defaultLevel
         self.isoCtrlLine.setValue(level)
-        return find_mainContour(self.iso.data, level, roi=self.iso.roi)
+        return ppd.find_mainContour(self.iso.data, level, roi=self.iso.roi)
 
     def plot_computed_profile(self, x, y):
 

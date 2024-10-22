@@ -36,7 +36,7 @@ class Parameters():
         capillary_length: {roundifnotnone(self.get_l_mm(), digits=4, unit='mm')} ({roundifnotnone(self.get_l_px(), digits=2, unit='px')})
         """
     def __str__(self) -> str:
-        return f"Parameters (a={self.get_a_deg()} deg; x={self.get_x_px()} px; y={self.get_y_px()} px; r={self.get_r_mm()} mm; l={self.get_l_mm()} mm)"
+        return f"(px_per_mm={self.get_px_density()} ; rhog={self.get_g()} | a={self.get_a_deg()} deg; x={self.get_x_px()} px; y={self.get_y_px()} px; r={self.get_r_mm()} mm; l={self.get_l_mm()} mm)"
 
     def describe(self, printfn=print, name = None):
         printfn(f"Parameters {'' if name is None else ('(' + name + ')')}" + repr(self))
@@ -46,11 +46,11 @@ class Parameters():
     def get_px_density(self) -> float:
         return self._px_per_mm
     def set_px_spacing(self, pixel_spacing:float) -> None:
-        self._px_per_mm = None if pixel_spacing is None else 1/pixel_spacing
+        self._px_per_mm = None if ((pixel_spacing or 0) == 0) else 1/pixel_spacing
     def get_px_spacing(self) -> float:
-        return None if self._px_per_mm is None else 1/self._px_per_mm
+        return None if ((self._px_per_mm or 0) == 0) else 1/self._px_per_mm
 
-    def set_densitycontrast(self, rhog:float) -> None:
+    def set_densitycontrast(self, rhog:Optional[float]) -> None:
         self._rhog = rhog
     def get_densitycontrast(self) -> float:
         return self._rhog
@@ -101,6 +101,23 @@ class Parameters():
     def get_fitparams(self) -> Fitparams:
         return [self.get_a_rad(), self.get_x_px(), self.get_y_px(), self.get_r_px(), self.get_l_px()]
 
+    def can_estimate(self) -> bool:
+        return not( (self.get_px_density() or 0) == 0 )
+    def can_optimize(self) -> bool:
+        r0_is_ok = not( (self.get_r_px() or 0) == 0 )
+        lcap_is_ok = not( (self.get_l_px() or 0) == 0 )
+        px_density_is_ok = not( (self.get_px_density() or 0) == 0 )
+        return r0_is_ok * lcap_is_ok * px_density_is_ok
+
+    def get_bond(self):
+        return None if (self._r_px is None or self._l_px is None) else (self._r_px / self._l_px)**2
+
+    def set_g(self, rhog:Optional[float]) -> None:
+        self._rhog = rhog
+    def get_g(self):
+        return self._rhog
+    def get_surface_tension(self):
+        return None if (self._rhog is None or self.get_l_mm() is None) else (self._rhog * self.get_l_mm()**2)
 
 
 # paremeters

@@ -5,7 +5,7 @@ import numpy as np
 # from pyqtgraph.Qt.QtGui import QPixmap
 from pyqtgraph.Qt.QtWidgets import QMainWindow, QFileDialog
 
-from .. import *
+from ... import pypendentdrop as ppd
 
 from .mainwindow_ui import Ui_PPD_MainWindow
 from .plotwidget import ppd_plotWidget
@@ -57,7 +57,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         ### MEASUREMENT TAB
         ## GUESS + FIT
         self.analysisTabs.setTabEnabled(1, False)
-        self.pixelDensitySpinBox.editingFinished.connect(self.harmonizePixelSize)
+        self.pixelDensitySpinBox.editingFinished.connect(self.harmonizePixelSpacing)
         self.pixelSizeSpinbox.editingFinished.connect(self.harmonizePixelDensity)
         self.autoGuessPushButton.clicked.connect(self.guessParameters)
 
@@ -68,12 +68,14 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         self.r0SpinBox.valueChanged.connect(self.r0_manualchange)
         self.caplengthSpinBox.valueChanged.connect(self.caplength_manualchange)
 
-        self.parameters = [0., 0., 0., 0., 2.7]
+        self.parameters:ppd.Parameters = ppd.Parameters()
         self.applyParameters()
+
+        self.rhogSpinBox.valueChanged.connect(self.rhog_manualchange)
+        self.rhog_manualchange()
 
         self.optimizePushButton.clicked.connect(self.optimizeParameters)
 
-        
     def choose_image_file(self):
         
         dialog = QFileDialog(self)
@@ -136,80 +138,76 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
     ### ESTIMATE PARAMETERS
 
-    def harmonizePixelDensity(self, pixelSize:Optional[float]=None):
-        if pixelSize is None:
-            pixelSize = self.pixelSizeSpinbox.value()
-        self.pixelDensitySpinBox.editingFinished.disconnect(self.harmonizePixelSize)
-        if pixelSize > 0:
-            self.pixelDensitySpinBox.setValue(1/pixelSize)
-            if not self.autoGuessPushButton.isEnabled():
-                self.autoGuessPushButton.setEnabled(True)
-        else:
-            self.pixelDensitySpinBox.setValue(0)
-            if not self.autoGuessPushButton.isEnabled():
-                self.autoGuessPushButton.setEnabled(False)
-        self.pixelDensitySpinBox.editingFinished.connect(self.harmonizePixelSize)
+    def harmonizePixelDensity(self, pixelSpacing:Optional[float]=None):
+        if pixelSpacing is None:
+            pixelSpacing = self.pixelSizeSpinbox.value()
+        ppd.debug(f'harmonizePixelDensity with spacing={pixelSpacing} px/mm')
+        self.pixelDensitySpinBox.editingFinished.disconnect(self.harmonizePixelSpacing)
 
-    def harmonizePixelSize(self, pixelDensity:float=None):
+        self.parameters.set_px_spacing(pixelSpacing)
+        self.pixelDensitySpinBox.setValue(self.parameters.get_px_density() or 0)
+
+        self.autoGuessPushButton.setEnabled(self.parameters.can_estimate())
+
+        self.pixelDensitySpinBox.editingFinished.connect(self.harmonizePixelSpacing)
+
+    def harmonizePixelSpacing(self, pixelDensity:float=None):
         if pixelDensity is None:
             pixelDensity = self.pixelDensitySpinBox.value()
+        ppd.debug(f'harmonizePixelSpacing with density={pixelDensity} px/mm')
         self.pixelSizeSpinbox.editingFinished.disconnect(self.harmonizePixelDensity)
-        if pixelDensity > 0:
-            self.pixelSizeSpinbox.setValue(1/pixelDensity)
-            if not self.autoGuessPushButton.isEnabled():
-                self.autoGuessPushButton.setEnabled(True)
-        else:
-            self.pixelSizeSpinbox.setValue(0)
-            if not self.autoGuessPushButton.isEnabled():
-                self.autoGuessPushButton.setEnabled(False)
+
+        self.parameters.set_px_density(pixelDensity)
+        self.pixelSizeSpinbox.setValue(self.parameters.get_px_spacing() or 0)
+
+        self.autoGuessPushButton.setEnabled(self.parameters.can_estimate())
+
         self.pixelSizeSpinbox.editingFinished.connect(self.harmonizePixelDensity)
 
     def angleg_manualchange(self, angleg:Optional[float]=None):
         if angleg is None:
             angleg = self.anglegSpinBox.value()
-        self.parameters[0] = angleg * RAD_PER_DEG
+        self.parameters.set_a_deg(angleg)
         self.actualizeComputedCurve()
 
     def tipx_manualchange(self, tipx:Optional[float]=None):
         if tipx is None:
             tipx = self.tipxSpinBox.value()
-        self.parameters[2] = tipx
+        self.parameters.set_x_px(tipx)
         self.actualizeComputedCurve()
 
     def tipy_manualchange(self, tipy:Optional[float]=None):
         if tipy is None:
             tipy = self.tipySpinBox.value()
-        self.parameters[1] = tipy
+        self.parameters.set_y_px(tipy)
         self.actualizeComputedCurve()
 
     def r0_manualchange(self, r0:Optional[float]=None):
         if r0 is None:
             r0 = self.r0SpinBox.value()
-        self.parameters[3] = r0
+        self.parameters.set_r_mm(r0)
         self.actualizeComputedCurve()
         self.actualizeSurfaceTension()
 
     def caplength_manualchange(self, caplength:Optional[float]=None):
         if caplength is None:
             caplength = self.caplengthSpinBox.value()
-        self.parameters[4] = caplength
+        self.parameters.set_l_mm(caplength)
         self.actualizeComputedCurve()
         self.actualizeSurfaceTension()
 
     def applyParameters(self):
-        gravity_angle, y_tip_position, x_tip_position, r0_mm, capillary_length_mm = self.parameters
-
         self.anglegSpinBox.valueChanged.disconnect(self.angleg_manualchange)
         self.tipxSpinBox.valueChanged.disconnect(self.tipx_manualchange)
         self.tipySpinBox.valueChanged.disconnect(self.tipy_manualchange)
         self.r0SpinBox.valueChanged.disconnect(self.r0_manualchange)
         self.caplengthSpinBox.valueChanged.disconnect(self.caplength_manualchange)
 
-        self.anglegSpinBox.setValue(gravity_angle * DEG_PER_RAD)
-        self.tipxSpinBox.setValue(x_tip_position)
-        self.tipySpinBox.setValue(y_tip_position)
-        self.r0SpinBox.setValue(r0_mm)
-        self.caplengthSpinBox.setValue(capillary_length_mm)
+        self.anglegSpinBox.setValue(self.parameters.get_a_deg() or 0)
+        self.tipxSpinBox.setValue(self.parameters.get_x_px() or 0)
+        self.tipySpinBox.setValue(self.parameters.get_y_px() or 0)
+        self.r0SpinBox.setValue(self.parameters.get_r_mm() or 0)
+        self.caplengthSpinBox.setValue(self.parameters.get_l_mm() or 0)
 
         self.anglegSpinBox.valueChanged.connect(self.angleg_manualchange)
         self.tipxSpinBox.valueChanged.connect(self.tipx_manualchange)
@@ -221,27 +219,27 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         self.actualizeSurfaceTension()
 
     def guessParameters(self):
-        px_per_mm = self.pixelDensitySpinBox.value()
-        # print('DEBUG GUESS PARAMETERS')
-        threshold = self.customThresholdSpinBox.value()
+        if self.parameters.can_estimate():
+            px_per_mm = self.parameters.get_px_density()
+            threshold = self.customThresholdSpinBox.value()
 
-        mainContour = self.plotWidget.isoCurve_level(level=threshold)
-        # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
+            mainContour = self.plotWidget.isoCurve_level(level=threshold)
+            # print('DEBUG:', f'Contour shape: {mainContour.shape} (expect (2, N))')
 
-        imagecentre = image_centre(np.array(self.plotWidget.iso.data))
-        # print('DEBUG:', f'image centre (rotation centre): {imagecentre}')
+            imagecentre = ppd.image_centre(np.array(self.plotWidget.iso.data))
+            # print('DEBUG:', f'image centre (rotation centre): {imagecentre}')
 
-        self.parameters = estimate_parameters(imagecentre, mainContour, px_per_mm=px_per_mm)
+            self.parameters = ppd.estimate_parameters(imagecentre, mainContour, px_per_mm=px_per_mm)
+            self.rhog_manualchange()
 
-        talk_params(self.parameters, px_per_mm=px_per_mm)
+            self.parameters.describe(printfn=ppd.info, name='estimated')
 
-        self.applyParameters()
+            self.applyParameters()
 
     ### OPTIMIZE PARAMETERS
 
     def areParametersValid(self) -> bool:
-        " Coucou "
-        canDoOptimization = not( (self.pixelDensitySpinBox.value() == 0) or np.prod(np.array(self.parameters[3:])==0) )
+        canDoOptimization = self.parameters.can_optimize()
 
         self.optimizePushButton.setEnabled(canDoOptimization)
         if not(canDoOptimization):
@@ -252,7 +250,6 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
     def optimizeParameters(self):
         if self.areParametersValid():
 
-            px_per_mm = self.pixelDensitySpinBox.value()
             # print('DEBUG OPTIMIZE PARAMETERS')
             threshold = self.customThresholdSpinBox.value()
             mainContour = self.plotWidget.isoCurve_level(level=threshold)
@@ -266,30 +263,30 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             print('DEBUG:', f'To fit: {to_fit}')
 
-            opti_success, self.parameters = optimize_profile(mainContour, px_per_mm=px_per_mm,
-                                                       parameters_initialguess=self.parameters, to_fit=to_fit)
+            opti_success, self.parameters = ppd.optimize_profile(mainContour, parameters_initialguess=self.parameters, to_fit=to_fit)
 
-            talk_params(self.parameters, px_per_mm=px_per_mm)
+            self.parameters.describe(printfn=ppd.info, name='optimized')
 
             self.applyParameters()
+            self.actualizeSurfaceTension()
 
     def actualizeComputedCurve(self):
         if self.areParametersValid():
-            px_per_mm = self.pixelDensitySpinBox.value()
-            R, Z = integrated_contour(px_per_mm, self.parameters)
+            R, Z = ppd.integrated_contour(self.parameters)
 
             self.plotWidget.plot_computed_profile(R, Z)
 
     ### PHYSICS
+    def rhog_manualchange(self, rhog:Optional[float]=None):
+        if rhog is None:
+            rhog = self.rhogSpinBox.value()
+        self.parameters.set_densitycontrast(rhog)
+        self.actualizeSurfaceTension()
 
     def actualizeSurfaceTension(self):
         if self.areParametersValid():
-            r0_mm = self.parameters[3]
-            caplength_mm = self.parameters[4]
-            self.surface_tension = self.rhogSpinBox.value() * caplength_mm**2
-            self.bond = (r0_mm / caplength_mm)**2
-            self.gammaSpinBox.setValue(self.surface_tension)
-            self.bondSpinBox.setValue(self.bond)
+            self.gammaSpinBox.setValue(self.parameters.get_surface_tension() or 0)
+            self.bondSpinBox.setValue(self.parameters.get_bond() or 0)
 
 
 
