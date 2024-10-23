@@ -102,14 +102,8 @@ def otsu_threshold(image:np.ndarray) -> int:
     """Otsu's optimal threshold for an image.
 
     Computes Otsu's intraclass variance for all integers 0-225 and returns the best threshold.
-    test11 :func:`otsu_intraclass_variance <pypendentdrop.otsu_intraclass_variance>`
-    test12 :func:`pypendentdrop.otsu_intraclass_variance`
-    test13 :func:`otsu_intraclass_variance`
-    test14 :func:otsu_intraclass_variance
-    test21 :py:func:`otsu_intraclass_variance <pypendentdrop.otsu_intraclass_variance>`
-    test22 :py:func:`pypendentdrop.otsu_intraclass_variance`
-    test23 :py:func:`otsu_intraclass_variance`
-    test24 :py:func:otsu_intraclass_variance
+
+    Uses `otsu_intraclass_variance <pypendentdrop.otsu_intraclass_variance>`
 
     Parameters
     ----------
