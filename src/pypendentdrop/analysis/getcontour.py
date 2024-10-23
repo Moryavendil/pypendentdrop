@@ -8,11 +8,30 @@ from .. import error, warning, info, debug, trace
 # Region OF Interest management
 Roi = Optional[List[Optional[int]]]
 
-# warnings.filterwarnings("ignore", category=RuntimeWarning)
-def format_roi(data:np.ndarray, roi:Roi=None):
+def format_roi(image:np.ndarray, roi:Roi=None) -> Roi:
+    """Formats a ROI so that it is inside the image.
+
+    A ROI is a 4-list (or 4-tuple) where the 2 first entries are the (x, y) coordinates of the top-left corner,
+    and the 2 last entries are the (x, y) coordinates of the bottom right corner.
+    This function checks that the corners are well-ordered and inside the image.
+    None is treated as min(=0) for the TL corner or max(=width or height) for the BR corner.
+
+    Parameters
+    ----------
+    image : ndarray
+
+    roi : Roi
+        Initial ROI. Can be None, or [None, None, None, None]
+
+    Returns
+    -------
+    roi : Roi
+        The formatted ROI
+
+    """
     if roi is None:
         roi = [None, None, None, None] # TLx, TLy, BRx, BRy
-    height, width = data.shape
+    height, width = image.shape
 
     tlx, tly, brx, bry = roi
     if tlx is None:
@@ -49,10 +68,23 @@ def format_roi(data:np.ndarray, roi:Roi=None):
 
     trace(f'format_roi: {roi} -> {[tlx, tly, brx, bry]}')
     return [tlx, tly, brx, bry]
-def otsu_intraclass_variance(image, threshold):
-    """
-    Otsu's intra-class variance.
+
+def otsu_intraclass_variance(image:np.ndarray, threshold:Union[int, float]) -> float:
+    """Otsu's intra-class variance.
+
     If all pixels are above or below the threshold, this will throw a warning that can safely be ignored.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image
+
+    threshold : float
+
+    Returns
+    -------
+    variance : float
+
     """
     try:
         return np.nansum(
@@ -63,15 +95,36 @@ def otsu_intraclass_variance(image, threshold):
             ]
         )
     except:
-        return 0
+        return 0.
     # NaNs only arise if the class is empty, in which case the contribution should be zero, which `nansum` accomplishes.
 
-def otsu_threshold(data:np.ndarray) -> int:
+def otsu_threshold(image:np.ndarray) -> int:
+    """Otsu's optimal threshold for an image.
+
+    Computes Otsu's intraclass variance for all integers 0-225 and returns the best threshold.
+    test11 :func:`otsu_intraclass_variance <pypendentdrop.otsu_intraclass_variance>`
+    test12 :func:`pypendentdrop.otsu_intraclass_variance`
+    test13 :func:`otsu_intraclass_variance`
+    test14 :func:otsu_intraclass_variance
+    test21 :py:func:`otsu_intraclass_variance <pypendentdrop.otsu_intraclass_variance>`
+    test22 :py:func:`pypendentdrop.otsu_intraclass_variance`
+    test23 :py:func:`otsu_intraclass_variance`
+    test24 :py:func:otsu_intraclass_variance
+
+    Parameters
+    ----------
+    image : ndarray
+
+    Returns
+    -------
+    thershold : int
+
+    """
     test_tresholds = np.arange(255, dtype=float)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        otsu_variance = np.array([otsu_intraclass_variance(data, test_treshold) for test_treshold in test_tresholds])
+        otsu_variance = np.array([otsu_intraclass_variance(image, test_treshold) for test_treshold in test_tresholds])
 
     best_threshold_otsu = int(test_tresholds[np.argmin(otsu_variance)])
 

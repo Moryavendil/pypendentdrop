@@ -25,7 +25,7 @@ pxldensity = 57.0
 estimated_parameters = ppd.estimate_parameters(image, contour, pxldensity)
 
 # Set manually an estimation of the capillary length
-estimated_parameters.set_capillary_length_mm(2.65)
+estimated_parameters.set_l_mm(2.65)
 
 # Print the estimated parameters in the console
 estimated_parameters.describe(name='estimated')
