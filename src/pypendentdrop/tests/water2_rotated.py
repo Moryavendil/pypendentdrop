@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     ppd.logger.debug(f'Drop contour: {cnt.shape[1]} points')
 
-    estimated_parameters = ppd.estimate_parameters(ppd.image_centre(img), cnt, px_per_mm)
+    estimated_parameters = ppd.estimate_parameters(img, cnt, px_per_mm)
 
     args_parameters = ppd.Parameters()
     args_parameters.set_px_density(px_per_mm)

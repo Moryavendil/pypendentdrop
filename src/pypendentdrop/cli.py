@@ -122,7 +122,7 @@ def main():
 
     logger.debug(f'Drop contour: {cnt.shape[1]} points')
 
-    estimated_parameters = estimate_parameters(image_centre(img), cnt, px_per_mm)
+    estimated_parameters = estimate_parameters(img, cnt, px_per_mm)
 
     args_parameters = Parameters()
     args_parameters.set_px_density(px_per_mm)

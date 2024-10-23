@@ -167,7 +167,7 @@ def rotate_and_scale(contour, angle:float=0., centre:Optional[Union[Tuple, List,
     y_rotated = rot_mat[1,0] * contour[0] + rot_mat[1, 1] * contour[1] + rot_mat[1, 2]
     return x_rotated, y_rotated
 
-def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Parameters:
+def estimate_parameters(image:np.ndarray, contour:np.ndarray, px_per_mm) -> Parameters:
     """
     Estimates the parameters crudely using (hopefully) robust techniques.
 
@@ -176,7 +176,10 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Paramete
     :param px_per_mm:
     :return:
     """
-    ### INITIAL ESTIMATION OF THE PARAMETERS
+    if image.shape == (2,): # for old code compatibility
+        centre_of_image = image
+    else:
+        centre_of_image = image_centre(image)
 
     ### ANGLE OF GRAVITY
     gravity_angle:float = 0.
@@ -207,7 +210,7 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Paramete
     trace(f"\tFound gravity_angle={gravity_angle*180/np.pi} deg")
 
     # Now we need to rotate the contour in order to correctly estimate the other parameters
-    contour_tiltcorrected = rotate_and_scale(contour, angle=-gravity_angle, centre=image_centre)
+    contour_tiltcorrected = rotate_and_scale(contour, angle=-gravity_angle, centre=centre_of_image)
 
     ### Position of the tip
 
@@ -217,7 +220,7 @@ def estimate_parameters(image_centre, contour:np.ndarray, px_per_mm) -> Paramete
 
     # we translate that to the real contour
     x_tip_position, y_tip_position = rotate_and_scale([x_tip_position_tiltcorrected, y_tip_position_tiltcorrected],
-                                                      angle=gravity_angle, centre=image_centre)
+                                                      angle=gravity_angle, centre=centre_of_image)
 
     trace(f"\tFound x_tip_position={x_tip_position} px")
     trace(f"\tFound y_tip_position={y_tip_position} px")

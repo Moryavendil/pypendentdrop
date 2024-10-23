@@ -1,40 +1,63 @@
 import pypendentdrop as ppd
-	
+
+# the path to the image file
 filepath = './src/pypendentdrop/tests/testdata/water_2.tif'
-pxldensity = 57.0
-rhog = 9.812
-roi = [10, 90, 300, 335] # use roi=None if you do not care about the ROI
+# The Region Of Interest: roi = [TLx, TLy, BRx, BRy]
+# Use roi = None or roi = [None, None, None, None] if you do not care
+roi = [10, 90, 300, 335]
 
-importsuccess, image = ppd.import_image(filepath)
+# 1. Import the image
+import_successful, image = ppd.import_image(filepath)
 
-if not importsuccess:
+if not import_successful:
     raise FileNotFoundError(f'Could not import image at {filepath}')
 
+# 2. Choose a threshold (here automatically)
 threshold = ppd.best_threshold(image, roi=roi)
 
+# 3. Detect the contour
 contour = ppd.find_mainContour(image, threshold, roi=roi)
 
-estimated_parameters = ppd.estimate_parameters(ppd.image_centre(image), contour, pxldensity)
+# 4. Pixel density of the image, in px/mm
+pxldensity = 57.0
 
-estimated_parameters.set_capillary_length_mm(2.65) # set manually an estimation of the capillary length
+# 5. Estimate roughly the parameters of the drop
+estimated_parameters = ppd.estimate_parameters(image, contour, pxldensity)
 
-estimated_parameters.describe(name='estimated')# print the estimated parameters in the console
+# Set manually an estimation of the capillary length
+estimated_parameters.set_capillary_length_mm(2.65)
 
-opti_success, optimized_parameters = ppd.optimize_profile(contour, estimated_parameters)
+# Print the estimated parameters in the console
+estimated_parameters.describe(name='estimated')
 
-if not opti_success:
-    print('optimization failed :(')
-else:
-    optimized_parameters.describe(name='optimized')# print the optimized parameters in the console
+# 6. Optimize these parameters
+optimization_successful, optimized_parameters = ppd.optimize_profile(contour, estimated_parameters)
 
+if optimization_successful:
+    # Print the optimized parameters in the console
+    optimized_parameters.describe(name='optimized')
+
+    # Print the bond number corresponding to the drop
     print(f'Bond number: {round(optimized_parameters.get_bond(), 3)}')
 
+    # The density contrast
+    rhog = 9.812
     optimized_parameters.set_densitycontrast(rhog)
-    print(f'Surface tension gamma: {round(optimized_parameters.get_surface_tension(), 3)} mN/m')
 
+    # 7. Compute the surface tension
+    print(f'Surface tension gamma: {round(optimized_parameters.get_surface_tension(), 3)} mN/m')
+else:
+    print('Optimization failed :(')
+
+import matplotlib.pyplot as plt
+from pypendentdrop import plot
+
+if not optimization_successful:
+    fig, (ax1, ax1) = plt.subplots(1, 1)
+    plot.plot_image_contour(ax1, image, contour, estimated_parameters, 'estimated', roi=roi)
+    plt.savefig('deleteme_estimatedparameters.png', dpi=300)
+else:
     ### Plotting a comparison between the estimated and optimized parameters
-    import matplotlib.pyplot as plt
-    from pypendentdrop import plot
 
     fig, (ax1, ax2) = plt.subplots(1, 2)
     plot.plot_image_contour(ax1, image, contour, estimated_parameters, 'estimated', roi=roi)

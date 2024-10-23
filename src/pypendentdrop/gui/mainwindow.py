@@ -240,9 +240,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             mainContour = self.plotWidget.isoCurve_level(level=threshold)
 
-            imagecentre = ppd.image_centre(np.array(self.plotWidget.iso.data))
-
-            self.parameters = ppd.estimate_parameters(imagecentre, mainContour, px_per_mm=px_per_mm)
+            self.parameters = ppd.estimate_parameters(np.array(self.plotWidget.iso.data), mainContour, px_per_mm=px_per_mm)
             self.rhog_manualchange()
 
             self.parameters.describe(printfn=ppd.info, name='estimated')
