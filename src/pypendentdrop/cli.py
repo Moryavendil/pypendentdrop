@@ -113,12 +113,12 @@ def main():
 
     logger.debug(f'Threshold level: {threshold}')
 
-    lines = find_contourLines(img, threshold, roi=roi)
+    lines = detect_contourlines(img, threshold, roi=roi)
     linelengths = [len(line) for line in lines]
 
     logger.debug(f'Number of lines: {len(lines)}, lengths: {linelengths}')
 
-    cnt = find_mainContour(img, threshold, roi=roi)
+    cnt = detect_main_contour(img, threshold, roi=roi)
 
     logger.debug(f'Drop contour: {cnt.shape[1]} points')
 

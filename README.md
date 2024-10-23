@@ -56,23 +56,23 @@ and you can then use the functions defined in the library. An example script `ex
 
 The main steps of measuring the surface tension of a liquid using the pendent drop method are
 
-1. Select an image (if possiblea a high quality, high contrast image of a symmetric drop) using `ppd.import_image(filename)`
+1. Select an image (if possible a high quality, high contrast image of a symmetric drop) using `ppd.import_image(filename)`
 
     *Optionally:* select the Region Of Interest in your image
 
 2. Choose a threshold for your image (or use `ppd.best_threshold(image)` to find it for you)
 
-3. Detect the contour of the drop using `ppd.find_mainContour(image, threshold)`
+3. Detect the contour of the drop using `ppd.detect_main_contour(image, threshold)`
 
 4. Specify the pixel density (or pixel size) of the image
 
-5. Obtain a coarse estimation of the parameters of the drop (tip position, angle of gravity, radius at apex, capillar length of liquid) using `ppd.estimated_parameters`
+5. Obtain a coarse estimation of the parameters of the drop (tip position, angle of gravity, radius at apex, capillar length of liquid) using `ppd.estimate_parameters(image, contour, pixeldensity)`
 
     *Optionally:* set some of the parameters yourself if the automatically-estimated parameters are not accurate enough
 
 6. Fit the drop profile using the estimated parameters as initial condition using `ppd.optimize_profile(contour, estimated_parameters)`
 
-7. Knowing the density contrast (density difference between the fluids times gravity acceleration), obtain the surface tension 
+7. Knowing the density contrast (density difference between the fluids times gravity acceleration), compute the surface tension.
 
 ## Dependencies
 

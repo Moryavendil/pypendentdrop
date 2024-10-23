@@ -38,7 +38,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
         data = self.data
 
         # lines = pg.isocurve(data, self.level, connected=True, extendToEdge=True)
-        lines = ppd.find_contourLines(data, self.level, roi=self.roi)
+        lines = ppd.detect_contourlines(data, self.level, roi=self.roi)
         self.path = QtGui.QPainterPath()
         for line in lines:
             self.path.moveTo(*line[0])
@@ -190,7 +190,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         if level is None:
             level = self.defaultLevel
         self.isoCtrlLine.setValue(level)
-        return ppd.find_mainContour(self.iso.data, level, roi=self.iso.roi)
+        return ppd.detect_main_contour(self.iso.data, level, roi=self.iso.roi)
 
     def plot_computed_profile(self, x, y):
 

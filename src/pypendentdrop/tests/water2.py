@@ -91,12 +91,12 @@ if __name__ == "__main__":
 
     ppd.logger.debug(f'Threshold level: {threshold}')
 
-    lines = ppd.find_contourLines(img, threshold, roi=roi)
+    lines = ppd.detect_contourlines(img, threshold, roi=roi)
     linelengths = [len(line) for line in lines]
 
     ppd.logger.debug(f'Number of lines: {len(lines)}, lengths: {linelengths}')
 
-    cnt = ppd.find_mainContour(img, threshold, roi=roi)
+    cnt = ppd.detect_main_contour(img, threshold, roi=roi)
 
     ppd.logger.debug(f'Drop contour: {cnt.shape[1]} points')
 

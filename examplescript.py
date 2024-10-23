@@ -16,7 +16,7 @@ if not import_successful:
 threshold = ppd.best_threshold(image, roi=roi)
 
 # 3. Detect the contour
-contour = ppd.find_mainContour(image, threshold, roi=roi)
+contour = ppd.detect_main_contour(image, threshold, roi=roi)
 
 # 4. Pixel density of the image, in px/mm
 pxldensity = 57.0
