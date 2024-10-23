@@ -8,6 +8,7 @@ from .. import error, warning, info, debug, trace
 # Region OF Interest management
 Roi = Optional[List[Optional[int]]]
 
+# warnings.filterwarnings("ignore", category=RuntimeWarning)
 def format_roi(data:np.ndarray, roi:Roi=None):
     if roi is None:
         roi = [None, None, None, None] # TLx, TLy, BRx, BRy
@@ -48,10 +49,6 @@ def format_roi(data:np.ndarray, roi:Roi=None):
 
     trace(f'format_roi: {roi} -> {[tlx, tly, brx, bry]}')
     return [tlx, tly, brx, bry]
-
-import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
-
 def otsu_intraclass_variance(image, threshold):
     """
     Otsu's intra-class variance.
