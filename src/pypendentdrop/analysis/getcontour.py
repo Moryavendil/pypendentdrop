@@ -35,16 +35,16 @@ def format_roi(data:np.ndarray, roi:Roi=None):
         trace('format_roi: BRX not provided.')
         brx = None
     else:
-        if not(tlx <= brx < width):
-            warning(f'BRX="{brx}" does not verify TLX={tlx} <= BRX < width={width}. Its was overriden: BRX=None (=width)')
+        if not(tlx < brx <= width):
+            warning(f'BRX="{brx}" does not verify TLX={tlx} < BRX <= width={width}. Its was overriden: BRX=None (=width)')
             brx = None
 
     if bry is None:
         trace('format_roi: BRY not provided.')
         bry = None
     else:
-        if not(tly <= bry < height):
-            warning(f'BRY="{bry}" does not verify TLY={tly} <= BRY < height={height}. Its was overriden: BRX=None (=height)')
+        if not(tly < bry <= height):
+            warning(f'BRY="{bry}" does not verify TLY={tly} < BRY <= height={height}. Its was overriden: BRX=None (=height)')
             brx = None
 
     trace(f'format_roi: {roi} -> {[tlx, tly, brx, bry]}')
