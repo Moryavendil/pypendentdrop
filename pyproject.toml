@@ -21,13 +21,14 @@ keywords = [
 ]
 dependencies = [
     "pillow",
-    "contourpy",
-    "scipy",
+    "contourpy >= 1.0",
+    "scipy >= 1.7",
 ]
 
 [project.optional-dependencies]
 gui = ["pyqtgraph", "PyQt5"]
 cli = ["matplotlib"]
+full = ["matplotlib", "pyqtgraph", "PyQt5"]
 
 [tool.hatch.version]
 path = "src/pypendentdrop/__init__.py"
