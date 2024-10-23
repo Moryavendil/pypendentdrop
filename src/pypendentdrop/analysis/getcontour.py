@@ -130,12 +130,20 @@ def otsu_threshold(image:np.ndarray) -> int:
 
     return best_threshold_otsu
 
-def best_threshold(image:np.ndarray, roi:Roi=None) -> int:
-    """
+def best_threshold(image:np.ndarray, roi:Roi=None) -> float:
+    """Finds the most appropriate threshold for the image.
+
     Trying to find Otsu's most appropriate threshold for the image, falling back to 127 it it fails.
 
-    :param image:
-    :return:
+    Parameters
+    ----------
+    image : ndarray
+    roi : Roi, optional
+
+    Returns
+    -------
+    threshold : float
+
     """
     roi = format_roi(image, roi=roi)
     try:
@@ -146,20 +154,27 @@ def best_threshold(image:np.ndarray, roi:Roi=None) -> int:
     trace(f'best_threshold: Best threshold for the selected region of the image is {threshold}')
     return threshold
 
-def detect_contourlines(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> List[np.ndarray]:
+def detect_contourlines(image:np.ndarray, level:float, roi:Roi=None) -> List[np.ndarray]:
     """
-    Gets a collection of lines that each a contour of the level **level** of the data.
+
+    Gets a collection of lines that each a contour of the level `level` of the image.
     Each line is in line form, i.e. shape=(N,2)
 
-    :param data:
-    :param level:
-    :param roi:
-    :return:
+    Parameters
+    ----------
+    image : ndarray
+    level : float
+    roi : Roi, optional
+
+    Returns
+    -------
+    lines : array_like
+
     """
     trace('detect_contourlines: called')
-    roi = format_roi(data, roi=roi)
+    roi = format_roi(image, roi=roi)
 
-    cont_gen = contour_generator(z=data[roi[1]:roi[3], roi[0]:roi[2]], line_type=LineType.Separate) # quad_as_tri=True
+    cont_gen = contour_generator(z=image[roi[1]:roi[3], roi[0]:roi[2]], line_type=LineType.Separate) # quad_as_tri=True
 
     lines = cont_gen.lines(level)
 
@@ -168,15 +183,21 @@ def detect_contourlines(data:np.ndarray, level:Union[int, float], roi:Roi=None) 
 
     return lines
 
-def detect_main_contour(data:np.ndarray, level:Union[int, float], roi:Roi=None) -> np.ndarray:
-    """
+def detect_main_contour(image:np.ndarray, level:float, roi:Roi=None) -> np.ndarray:
+    """Detects the main (longest) contour of an image
+
     Returns the longest lines from detect_contourlines in a contour-form: shape=(2, N)
 
-    :param data:
-    :param level:
-    :param roi:
-    :return:
+    Parameters
+    ----------
+    image : ndarray
+    level : float
+    roi : Roi, optional
+
+    Returns
+    -------
+
     """
-    lines = detect_contourlines(data, level, roi=roi)
+    lines = detect_contourlines(image, level, roi=roi)
 
     return np.array(lines[np.argmax([len(line) for line in lines])]).T
