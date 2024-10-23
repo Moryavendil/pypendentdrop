@@ -1,7 +1,0 @@
-URGENT
-otsu threshold for auto threshold
-
-give example of a small python code for people who are afraid of a terminal
-
-COSMETICOOL
-isoline en rouge pour les petits contours, en vert pour le plus grand
