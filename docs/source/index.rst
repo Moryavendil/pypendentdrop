@@ -6,29 +6,20 @@
 PyPendentDrop documentation
 ===========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Python library (with graphical and command line interfaces) to measure surface tension from images of pendent drops.
 
-..
-    TextWithLinkToFn <--> :func:`TextWithLinkToFn <pypendentdrop.import_image>`
-    .. autofunction:: pypendentdrop.import_image
-    
-    .. autofunction:: pypendentdrop.format_roi
-    
-    .. autofunction:: pypendentdrop.otsu_intraclass_variance
-    
-    .. autofunction:: pypendentdrop.otsu_threshold
-    
-    .. autofunction:: pypendentdrop.best_threshold
-    
-    .. autofunction:: pypendentdrop.detect_contourlines
+* Package on `PyPI <https://pypi.org/project/pypendentdrop>`_
+* Source code on `GitHub <https://github.com/Moryavendil/pypendentdrop>`_
 
+
+PyPendentDrop is heavily inspired from the `Pendent Drop ImageJ plugin <https://github.com/adaerr/pendent-drop>`_.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: PyPendentDrop documentation:
    
    installation
-   quickstart
+   howtouse
+   method
+   API
 

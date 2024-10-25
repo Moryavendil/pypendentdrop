@@ -101,9 +101,7 @@ def otsu_intraclass_variance(image:np.ndarray, threshold:Union[int, float]) -> f
 def otsu_threshold(image:np.ndarray) -> int:
     """Otsu's optimal threshold for an image.
 
-    Computes Otsu's intraclass variance for all integers 0-225 and returns the best threshold.
-
-    Uses `otsu_intraclass_variance <pypendentdrop.otsu_intraclass_variance>`
+    Computes `Otsu's intraclass variance <pypendentdrop.otsu_intraclass_variance>` for all integers 0-225 and returns the best threshold.
 
     Parameters
     ----------
@@ -149,10 +147,10 @@ def best_threshold(image:np.ndarray, roi:Roi=None) -> float:
     return threshold
 
 def detect_contourlines(image:np.ndarray, level:float, roi:Roi=None) -> List[np.ndarray]:
-    """
+    """Returns all the closed lines enclosing regions in ``image`` that are above ``level``.
 
-    Gets a collection of lines that each a contour of the level `level` of the image.
-    Each line is in line form, i.e. shape=(N,2)
+    Returns a collection of lines that each a contour of the level ``level`` of the image.
+    Each line is in line-form, i.e. shape=(N,2).
 
     Parameters
     ----------
@@ -163,6 +161,7 @@ def detect_contourlines(image:np.ndarray, level:float, roi:Roi=None) -> List[np.
     Returns
     -------
     lines : array_like
+        A collection of ndarrays of shape (N, 2).
 
     """
     trace('detect_contourlines: called')
@@ -178,9 +177,10 @@ def detect_contourlines(image:np.ndarray, level:float, roi:Roi=None) -> List[np.
     return lines
 
 def detect_main_contour(image:np.ndarray, level:float, roi:Roi=None) -> np.ndarray:
-    """Detects the main (longest) contour of an image
+    """Returns the main (longest) closed line enclosing a region in ``image`` that is above ``level``.
 
-    Returns the longest lines from detect_contourlines in a contour-form: shape=(2, N)
+    Finds the longest of all `contour lines <pypendentdrop.otsu_intraclass_variance>` above a specific level,
+    and returns its transposition.
 
     Parameters
     ----------
@@ -190,6 +190,8 @@ def detect_main_contour(image:np.ndarray, level:float, roi:Roi=None) -> np.ndarr
 
     Returns
     -------
+    lines : ndarray
+        An ndarray of shape (2, N).
 
     """
     lines = detect_contourlines(image, level, roi=roi)

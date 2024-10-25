@@ -11,6 +11,16 @@ Fitparams = List[float]
 def roundifnotnone(val:Optional[float], digits=2, unit=None):
     return None if val is None else f"{round(val, digits)}{'' if unit is None else ' '+unit}"
 class Parameters():
+    """The parameters describing a drop.
+
+    This class stores the parameters describing the drop in the image
+    (gravity angle, tip position in px, radius of curvation in px, capillary length in px).
+    It also stores physically relevant informations, such as the pixel-to-mm conversion constant, the acceleration of gravity, the density ratio between the two fluids.
+
+    It can return all these parameters and equivalent ondes (bond number, surface tension) in different units.
+
+    This class has no public attributes, you should use the (numerous) getter and setter methods to manipulate the variables.
+    """
     RAD_PER_DEG = np.pi/180
     DEG_PER_RAD = 180/np.pi
 
@@ -39,6 +49,7 @@ class Parameters():
         return f"(px_per_mm={self.get_px_density()} ; rhog={self.get_g()} | a={self.get_a_deg()} deg; x={self.get_x_px()} px; y={self.get_y_px()} px; r={self.get_r_mm()} mm; l={self.get_l_mm()} mm)"
 
     def describe(self, printfn=print, name = None):
+        """Prints the parameters in the console in a human-friendly fashion."""
         printfn(f"Parameters {'' if name is None else ('(' + name + ')')}" + repr(self))
 
     def set_px_density(self, pixel_density:float) -> None:
@@ -93,19 +104,21 @@ class Parameters():
     def set_l_mm(self, lcap_mm:float) -> None:
         self._l_px = None if (lcap_mm is None or self._px_per_mm is None) else lcap_mm * self._px_per_mm
     def get_l_mm(self) -> float:
+        """Get the capillary length, in mm."""
         return None if (self._px_per_mm is None or self._l_px is None) else self._l_px / self._px_per_mm
 
     def get_dimensionlessTipRadius(self):
         return None if (self._r_px is None or self._l_px is None) else self._r_px / self._l_px
 
     def get_fitparams(self) -> Fitparams:
+        """Returns the parameters in a ``scipy.minimize``-friendly way."""
         return [self.get_a_rad(), self.get_x_px(), self.get_y_px(), self.get_r_px(), self.get_l_px()]
 
     def can_show_tip_position(self) -> bool:
+        """Decides if the tip position is plausible and should be displayed."""
         x_is_ok = not( (self.get_x_px() or 0) == 0 )
         y_is_ok = not( (self.get_y_px() or 0) == 0 )
         return x_is_ok * y_is_ok
-
     def can_estimate(self) -> bool:
         return not( (self.get_px_density() or 0) == 0 )
     def can_optimize(self) -> bool:
@@ -115,13 +128,15 @@ class Parameters():
         return r0_is_ok * lcap_is_ok * px_density_is_ok
 
     def get_bond(self):
+        """Returns the Bond number (square of the (tip radius)/(capillary length) ratio)"""
         return None if (self._r_px is None or self._l_px is None) else (self._r_px / self._l_px)**2
 
     def set_g(self, rhog:Optional[float]) -> None:
         self._rhog = rhog
     def get_g(self):
         return self._rhog
-    def get_surface_tension(self):
+    def get_surface_tension(self): # todo set name to get_surface_tension_mN so that units are explicit
+        """Returns the surface tension in mN."""
         return None if (self._rhog is None or self.get_l_mm() is None) else (self._rhog * self.get_l_mm()**2)
 
 
@@ -168,15 +183,24 @@ def rotate_and_scale(contour, angle:float=0., centre:Optional[Union[Tuple, List,
     return x_rotated, y_rotated
 
 def estimate_parameters(image:np.ndarray, contour:np.ndarray, px_per_mm) -> Parameters:
-    """
-    Estimates the parameters crudely using (hopefully) robust techniques.
+    """Provides a coarse estimation of the parameters using (hopefully) robust techniques.
 
-    :param image_centre:
-    :param contour:
-    :param px_per_mm:
-    :return:
+    Parameters
+    ----------
+    image : ndarray
+        The image of the drop
+    contour : ndarray
+        The contour of the drop, with shape (2, N)
+    px_per_mm : float
+        The pixel density of the image.
+
+    Returns
+    -------
+    parameters: Parameters
+        An estimation of the parameters describing the drop.
+
     """
-    if image.shape == (2,): # for old code compatibility
+    if image.shape == (2,): # for old code compatibility # depreciate #todo remove this one day
         centre_of_image = image
     else:
         centre_of_image = image_centre(image)
@@ -308,8 +332,7 @@ def greater_possible_zMax(tipRadius:float) -> float:
     return min(3.5, 3 / tipRadius) if tipRadius > .5 else 2 * tipRadius * (1 + 1.55*tipRadius)
 
 def compute_nondimensional_profile(tipRadius:float, ds:float = 1e-3, approxLimit:float = 0.2, zMax:float = None) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Computes the nondimensional profile, starting at the bottom and up to an height zMax
+    """Computes the nondimensional profile, starting at the bottom and up to an height zMax.
 
     About the default value of ds:
     The length in px of the contour is L. We want around 2 points per pixel, and the length of the dimensionless drop will be
@@ -319,17 +342,25 @@ def compute_nondimensional_profile(tipRadius:float, ds:float = 1e-3, approxLimit
     To be safe, we take ds = 1e-3 by default.
     If using high resolution camera + excellent optics + optimal conditions, one might want it smaller.
 
-    About the default value of approxLimit:
-    It defines the fraction of capillary length or tip radius (whichever is smaller) up to which we use the approximate solution.
-    Following pendent drop, we take it equal to 0.2
-
     About the solver : We use LSODA form LAPACK (scipy.integrate's odeint). Good ol' Fortran never dissapoints.
 
-    :param tipRadius: The dimensionless tip radius r_0/l_c
-    :param ds:
-    :param approxLimit:
-    :param zMax:
-    :return:
+    Parameters
+    ----------
+    tipRadius : float, optional
+        The dimensionless tip radius r_0/l_c (square root of the Bond number).
+    ds : float, optional
+        The dimensionless integration step. The default value (1e-3) should be enough for most applications.
+    approxLimit : float, optional
+        The fraction of capillary length or tip radius (whichever is smaller) up to which we use the approximate solution.
+        todo: compute the difference between "true" profile (approxLimit = 1e-3) and the others to see what is the maximum reasonable approxlimit.
+    zMax : float, optional
+        The maximum height of the drop [useless]
+
+    Returns
+    -------
+    R, Z : Tuple[ndarray]
+        The right (R > 0) half of the dimensionless profile of the drop.
+
     """
     if zMax is None:
         zMax = greater_possible_zMax(tipRadius)
@@ -374,13 +405,18 @@ def compute_nondimensional_profile(tipRadius:float, ds:float = 1e-3, approxLimit
 
     return RPKZ[:, 0], RPKZ[:, 3]
 
-def integrated_contour(parameters:Parameters) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Gives the computed profile in pixel coordinates.
+def integrated_contour(parameters:Parameters) -> np.ndarray:
+    """The computed profile in pixel coordinates.
 
-    :param px_per_mm:
-    :param fitparams:
-    :return: The computed profile in pixel coordinates
+    Parameters
+    ----------
+    parameters : Parameters
+
+    Returns
+    -------
+    contour: Tuple[ndarray, ndarray]
+        The computed profile in pixel coordinates (shape 2, N).
+
     """
 
     tipRadius = parameters.get_dimensionlessTipRadius()
@@ -410,14 +446,42 @@ def integrated_contour(parameters:Parameters) -> Tuple[np.ndarray, np.ndarray]:
     Rdim = Rdim + x_tip_position
     Zdim = Zdim + y_tip_position
 
-    return Rdim, Zdim
+    return np.array((Rdim, Zdim))
 
 #compare computed profile to real profile
 def compute_gap_dimensionless(contour:np.ndarray, parameters:Parameters) -> float:
+    """The dimensionless area between the detected contour and the computed profile.
+
+    Parameters
+    ----------
+    contour : ndarray
+        The pixel coordinates of the detected contour to be compared with the computed profile, shape=(2, N)
+    parameters : Parameters
+        The parameters to compute the theoretical profile.
+
+    Returns
+    -------
+    gap : float
+
+    """
     fitparams:Fitparams = parameters.get_fitparams()
 
     return compute_gap_dimensionless_fromfitparams(fitparams=fitparams, contour=contour)
 def compute_gap_pixel(contour:np.ndarray, parameters:Parameters) -> float:
+    """The area between the detected contour and the computed profile, in squared pixels.
+
+    Parameters
+    ----------
+    contour : ndarray
+        The pixel coordinates of the detected contour to be compared with the computed profile, shape=(2, N)
+    parameters : Parameters
+        The parameters to compute the theoretical profile.
+
+    Returns
+    -------
+    gap : float
+
+    """
     l_px = parameters.get_l_px()
 
     return compute_gap_dimensionless(contour, parameters)**(2/3) * l_px**2
@@ -471,15 +535,27 @@ def compute_gap_dimensionless_fromfitparams(fitparams:Fitparams, contour) -> flo
 def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
                      to_fit:Optional[List[bool]]=None,
                      maxiter:Optional[int]=None, method:Optional[str]=None) -> Tuple[bool, Parameters]:
-    """
+    """Computes the optimized parameters for the given ``contour``.
 
-    :param contour:
-    :param px_per_mm:
-    :param parameters_initialguess:
-    :param to_fit: True if the parameter is to be fitted, False if it is to be fixed
-    :param maxiter:
-    :param method: 'Nelder-Mead' (faster) or 'Powell' (pendent-drop like)
-    :return:
+    Minimises the :func:`dimensionless gap <pypendentdrop.compute_gap_dimensionless>` between the contour and the computed profile,
+    using scipy's ``minimize``.
+
+    Parameters
+    ----------
+    contour : ndarray
+        The pixel coordinates of the detected contour to be compared with the computed profile, shape=(2, N)
+    parameters_initialguess : Parameters
+        The initial guess of the parameters
+    to_fit : Tuple[bool, bool, bool, bool, bool], optional
+        Whether of not to fit the parameters todo: better document this (SEE EXAMPLES)
+    maxiter : int, optional
+        The maximum number of iterations. Depends on the method !
+    method : str, optional
+        The method passed to ``minimize``. Must be a bound-constrained method. Nelder-Mead works quite well.
+
+    Returns
+    -------
+
     """
     if method is None:
         method = 'Nelder-Mead'
@@ -542,6 +618,5 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
 
     parameters_opti.describe(printfn=trace, name='(optimized)')
     debug(f'Difference between contour and optimized profile: {round(compute_gap_pixel(contour, parameters_opti), 2)} px^2')
-
 
     return True, parameters_opti
