@@ -107,7 +107,7 @@ if __name__ == "__main__":
     args_parameters.set_y_px(args.yi)
     args_parameters.set_r_mm(args.ri)
     args_parameters.set_l_mm(args.li)
-    args_parameters.describe(printfn=ppd.trace, name='from arguments')
+    args_parameters.describe(printfn=ppd.trace, descriptor='from arguments')
 
     initial_parameters = ppd.Parameters()
     initial_parameters.set_px_density(px_per_mm)
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     initial_parameters.set_y_px(args.yi or estimated_parameters.get_y_px())
     initial_parameters.set_r_mm(args.ri or estimated_parameters.get_r_mm())
     initial_parameters.set_l_mm(args.li or estimated_parameters.get_l_mm())
-    initial_parameters.describe(printfn=ppd.debug, name='initial')
+    initial_parameters.describe(printfn=ppd.debug, descriptor='initial')
 
     ppd.logger.debug(f'chi2: {ppd.compute_gap_dimensionless(cnt, parameters=initial_parameters)}')
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
                                                      method=None)
 
     if opti_success:
-        opti_params.describe(printfn=ppd.info, name='optimized')
+        opti_params.describe(printfn=ppd.info, descriptor='optimized')
 
         ppd.logger.debug(f'chi2: {ppd.compute_gap_dimensionless(cnt, parameters=opti_params)}')
     else:

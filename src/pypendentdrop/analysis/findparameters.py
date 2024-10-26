@@ -19,7 +19,11 @@ class Parameters():
 
     It can return all these parameters and equivalent ondes (bond number, surface tension) in different units.
 
+    Use :meth:`describe <pypendentdrop.Parameters.describe>` to print the values of the parameters.
+
     This class has no public attributes, you should use the (numerous) getter and setter methods to manipulate the variables.
+
+    This class has str and repr methods #todo add exemples of what this means here.
     """
     RAD_PER_DEG = np.pi/180
     DEG_PER_RAD = 180/np.pi
@@ -48,33 +52,60 @@ class Parameters():
     def __str__(self) -> str:
         return f"(px_per_mm={self.get_px_density()} ; rhog={self.get_g()} | a={self.get_a_deg()} deg; x={self.get_x_px()} px; y={self.get_y_px()} px; r={self.get_r_mm()} mm; l={self.get_l_mm()} mm)"
 
-    def describe(self, printfn=print, name = None):
-        """Prints the parameters in the console in a human-friendly fashion."""
-        printfn(f"Parameters {'' if name is None else ('(' + name + ')')}" + repr(self))
+    def describe(self, printfn=print, descriptor = None) -> None:
+        """Prints the parameters in the console in a human-friendly fashion.
 
+        Parameters
+        ----------
+        printfn : function
+            The function that will be used to print. By default, print, but you can feed it a logging or debug function.
+        descriptor : str
+            A short description of this parameter object ('estimated', 'guessed', 'optimized' ...)
+
+        """
+        """"""
+        printfn(f"Parameters {'' if descriptor is None else ('(' + descriptor + ')')}" + repr(self))
+
+    ###### PIXEL SPACING / SIZE / DENSITY
+    def get_px_density(self) -> float:
+        """Get the density of pixels, in px/mm. Use ``set_px_density`` to set it."""
+        return self._px_per_mm
     def set_px_density(self, pixel_density:float) -> None:
         self._px_per_mm = pixel_density
-    def get_px_density(self) -> float:
-        return self._px_per_mm
+    def get_px_spacing(self) -> float:
+        """Get the spacing between pixels, in mm. Use ``set_px_spacing`` to set it."""
+        return None if ((self._px_per_mm or 0) == 0) else 1/self._px_per_mm
     def set_px_spacing(self, pixel_spacing:float) -> None:
         self._px_per_mm = None if ((pixel_spacing or 0) == 0) else 1/pixel_spacing
-    def get_px_spacing(self) -> float:
-        return None if ((self._px_per_mm or 0) == 0) else 1/self._px_per_mm
 
     def set_densitycontrast(self, rhog:Optional[float]) -> None:
         self._rhog = rhog
     def get_densitycontrast(self) -> float:
         return self._rhog
 
-    def set_a_rad(self, gravity_angle_rad:float) -> None:
-        self._a_rad = gravity_angle_rad
+    ### ANGLE OF GRAVITY SHORT VERSION
     def get_a_rad(self) -> float:
         return self._a_rad
-    def set_a_deg(self, gravity_angle_deg:float) -> None:
-        self._a_rad = None if gravity_angle_deg is None else gravity_angle_deg * self.RAD_PER_DEG
+    def set_a_rad(self, gravity_angle_rad:float) -> None:
+        self._a_rad = gravity_angle_rad
     def get_a_deg(self) -> float:
         return None if self._a_rad is None else self._a_rad * self.DEG_PER_RAD
+    def set_a_deg(self, gravity_angle_deg:float) -> None:
+        self._a_rad = None if gravity_angle_deg is None else gravity_angle_deg * self.RAD_PER_DEG
 
+    ### ANGLE OF GRAVITY LONG VERSION
+    def get_angleofgravity_rad(self) -> float:
+        """Get the angle of gravity, in radians. Use ``set_angleofgravity_rad`` to set it."""
+        return self._a_rad
+    def set_angleofgravity_rad(self, gravity_angle_rad:float) -> None:
+        self._a_rad = gravity_angle_rad
+    def get_angleofgravity_deg(self) -> float:
+        """Get the angle of gravity, in degrees. Use ``set_angleofgravity_deg`` to set it."""
+        return None if self._a_rad is None else self._a_rad * self.DEG_PER_RAD
+    def set_angleofgravity_deg(self, gravity_angle_deg:float) -> None:
+        self._a_rad = None if gravity_angle_deg is None else gravity_angle_deg * self.RAD_PER_DEG
+
+    ###### TIP POSITION SHORT VERSION
     def set_x_px(self, x_tip_position_px:float) -> None:
         self._x_px = x_tip_position_px
     def get_x_px(self) -> float:
@@ -88,24 +119,68 @@ class Parameters():
     def get_xy_px(self) -> Tuple[float, float]:
         return (self._x_px, self._y_px)
 
-    def set_r_px(self, r0_px:float) -> None:
-        self._r_px = r0_px
+    ### TIP POSITION LONG VERSION
+    def set_xtippos_px(self, x_tip_position_px:float) -> None:
+        """Get the x position of the tip, in pixels. Use ``set_xytippos_px`` to set it."""
+        self._x_px = x_tip_position_px
+    def get_xtippos_px(self) -> float:
+        return self._x_px
+    def set_ytippos_px(self, y_tip_position_px:float) -> None:
+        self._y_px = y_tip_position_px
+    def get_ytippos_px(self) -> float:
+        """Get the y position of the tip, in pixels. Use ``set_xytippos_px`` to set it."""
+        return self._y_px
+    def set_xytippos_px(self, xy_tip_position_px:float) -> None:
+        self._x_px, self._y_px = xy_tip_position_px
+    def get_xytippos_px(self) -> Tuple[float, float]:
+        """Get the (x, y) position of the tip, in pixels. Use ``set_xytippos_px`` to set it."""
+        return (self._x_px, self._y_px)
+
+    ### TIP RADIUS OF CURVATURE SHORT VERSION
     def get_r_px(self) -> float:
         return self._r_px
-    def set_r_mm(self, r0_mm:float) -> None:
-        self._r_px = None if (r0_mm is None or self._px_per_mm is None) else r0_mm * self._px_per_mm
+    def set_r_px(self, r0_px:float) -> None:
+        self._r_px = r0_px
     def get_r_mm(self) -> float:
         return None if (self._px_per_mm is None or self._r_px is None) else self._r_px / self._px_per_mm
+    def set_r_mm(self, r0_mm:float) -> None:
+        self._r_px = None if (r0_mm is None or self._px_per_mm is None) else r0_mm * self._px_per_mm
 
+    ### TIP RADIUS OF CURVATURE LONG VERSION
+    def get_tipradius_px(self) -> float:
+        """Get the radius of curvature at the tip, in pixels. Use ``set_tipradius_px`` to set it."""
+        return self._r_px
+    def set_tipradius_px(self, r0_px:float) -> None:
+        self._r_px = r0_px
+    def get_tipradius_mm(self) -> float:
+        """Get the radius of curvature at the tip, in millimeters. Use ``set_tipradius_mm`` to set it."""
+        return None if (self._px_per_mm is None or self._r_px is None) else self._r_px / self._px_per_mm
+    def set_tipradius_mm(self, r0_mm:float) -> None:
+        self._r_px = None if (r0_mm is None or self._px_per_mm is None) else r0_mm * self._px_per_mm
+
+    ### CAPILLARY LENGTH SHORT VERSION
+    def get_l_px(self) -> float:
+        """An alias of :meth:`get_caplength_px <pypendentdrop.get_caplength_px>`."""
+        return self._l_px
     def set_l_px(self, lcap_px:float) -> None:
         self._l_px = lcap_px
-    def get_l_px(self) -> float:
-        return self._l_px
+    def get_l_mm(self) -> float:
+        """An alias of :meth:`get_caplength_mm <pypendentdrop.get_caplength_mm>`."""
+        return None if (self._px_per_mm is None or self._l_px is None) else self._l_px / self._px_per_mm
     def set_l_mm(self, lcap_mm:float) -> None:
         self._l_px = None if (lcap_mm is None or self._px_per_mm is None) else lcap_mm * self._px_per_mm
-    def get_l_mm(self) -> float:
-        """Get the capillary length, in mm."""
-        return None if (self._px_per_mm is None or self._l_px is None) else self._l_px / self._px_per_mm
+
+    ### CAPILLARY LENGTH LONG VERSION
+    def get_caplength_mm(self) -> float:
+        """Get the capillary length, in millimeters. Use ``set_caplength_mm`` to set it."""
+        return self.get_l_mm()
+    def set_caplength_mm(self, lcap_mm:float):
+        self.set_l_mm(lcap_mm=lcap_mm)
+    def get_caplength_px(self) -> float:
+        """Get the capillary length, in pixels. Use ``set_caplength_px`` to set it."""
+        return self.get_l_px()
+    def set_caplength_px(self, lcap_px:float) -> None:
+        self.set_l_px(lcap_px=lcap_px)
 
     def get_dimensionlessTipRadius(self):
         return None if (self._r_px is None or self._l_px is None) else self._r_px / self._l_px
@@ -115,13 +190,14 @@ class Parameters():
         return [self.get_a_rad(), self.get_x_px(), self.get_y_px(), self.get_r_px(), self.get_l_px()]
 
     def can_show_tip_position(self) -> bool:
-        """Decides if the tip position is plausible and should be displayed."""
         x_is_ok = not( (self.get_x_px() or 0) == 0 )
         y_is_ok = not( (self.get_y_px() or 0) == 0 )
         return x_is_ok * y_is_ok
     def can_estimate(self) -> bool:
+        """Decides if an auto-estimation of the parameters is possible."""
         return not( (self.get_px_density() or 0) == 0 )
     def can_optimize(self) -> bool:
+        """Decides if an optimization of the parameters is possible."""
         r0_is_ok = not( (self.get_r_px() or 0) == 0 )
         lcap_is_ok = not( (self.get_l_px() or 0) == 0 )
         px_density_is_ok = not( (self.get_px_density() or 0) == 0 )
@@ -135,8 +211,8 @@ class Parameters():
         self._rhog = rhog
     def get_g(self):
         return self._rhog
-    def get_surface_tension(self): # todo set name to get_surface_tension_mN so that units are explicit
-        """Returns the surface tension in mN."""
+    def get_surface_tension_mN(self):
+        """Returns the surface tension in mN (or None if it cannot be computed)."""
         return None if (self._rhog is None or self.get_l_mm() is None) else (self._rhog * self.get_l_mm()**2)
 
 
@@ -302,7 +378,7 @@ def estimate_parameters(image:np.ndarray, contour:np.ndarray, px_per_mm) -> Para
     params_estimated.set_r_px(r0_px_fit)
     params_estimated.set_l_px(lcap_px)
 
-    params_estimated.describe(printfn=trace, name='(estimated)')
+    params_estimated.describe(printfn=trace, descriptor='(estimated)')
     debug(f'Difference between contour and estimated profile: {round(compute_gap_pixel(contour, params_estimated), 2)} px^2')
 
     return params_estimated
@@ -531,7 +607,6 @@ def compute_gap_dimensionless_fromfitparams(fitparams:Fitparams, contour) -> flo
     return difference
 
 # compute the optimal profile
-
 def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
                      to_fit:Optional[List[bool]]=None,
                      maxiter:Optional[int]=None, method:Optional[str]=None) -> Tuple[bool, Parameters]:
@@ -616,7 +691,7 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
     parameters_opti.set_r_px(minimization.x[3])
     parameters_opti.set_l_px(minimization.x[4])
 
-    parameters_opti.describe(printfn=trace, name='(optimized)')
+    parameters_opti.describe(printfn=trace, descriptor='(optimized)')
     debug(f'Difference between contour and optimized profile: {round(compute_gap_pixel(contour, parameters_opti), 2)} px^2')
 
     return True, parameters_opti

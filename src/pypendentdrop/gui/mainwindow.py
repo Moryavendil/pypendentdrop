@@ -247,7 +247,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
             self.parameters = ppd.estimate_parameters(np.array(self.plotWidget.iso.data), mainContour, px_per_mm=px_per_mm)
             self.rhog_manualchange()
 
-            self.parameters.describe(printfn=ppd.info, name='estimated')
+            self.parameters.describe(printfn=ppd.info, descriptor='estimated')
 
             self.applyParameters()
 
@@ -277,7 +277,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             opti_success, self.parameters = ppd.optimize_profile(mainContour, parameters_initialguess=self.parameters, to_fit=to_fit)
 
-            self.parameters.describe(printfn=ppd.info, name='optimized')
+            self.parameters.describe(printfn=ppd.info, descriptor='optimized')
 
             self.applyParameters()
             self.actualizeSurfaceTension()
@@ -303,7 +303,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
     def actualizeSurfaceTension(self):
         if self.canComputeProfile():
-            self.gammaSpinBox.setValue(self.parameters.get_surface_tension() or 0)
+            self.gammaSpinBox.setValue(self.parameters.get_surface_tension_mN() or 0)
             self.bondSpinBox.setValue(self.parameters.get_bond() or 0)
 
 

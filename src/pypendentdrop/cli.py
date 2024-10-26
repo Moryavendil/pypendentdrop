@@ -131,7 +131,7 @@ def main():
     args_parameters.set_y_px(args.yi)
     args_parameters.set_r_mm(args.ri)
     args_parameters.set_l_mm(args.li)
-    args_parameters.describe(printfn=trace, name='from arguments')
+    args_parameters.describe(printfn=trace, descriptor='from arguments')
 
     initial_parameters = Parameters()
     initial_parameters.set_px_density(px_per_mm)
@@ -140,7 +140,7 @@ def main():
     initial_parameters.set_y_px(args.yi or estimated_parameters.get_y_px())
     initial_parameters.set_r_mm(args.ri or estimated_parameters.get_r_mm())
     initial_parameters.set_l_mm(args.li or estimated_parameters.get_l_mm())
-    initial_parameters.describe(printfn=debug, name='initial')
+    initial_parameters.describe(printfn=debug, descriptor='initial')
 
     logger.debug(f'chi2: {compute_gap_dimensionless(cnt, parameters=initial_parameters)}')
 
@@ -165,7 +165,7 @@ def main():
         logger.warning('Optimization failed :( Falling back to the estimated parameters.')
         sys.exit(-2)
     else:
-        opti_params.describe(printfn=info, name='optimized')
+        opti_params.describe(printfn=info, descriptor='optimized')
 
         logger.debug(f'chi2: {compute_gap_dimensionless(cnt, parameters=opti_params)}')
 
@@ -189,7 +189,7 @@ def main():
         rhog:float = float(rhog)
 
         opti_params.set_densitycontrast(rhog)
-        print(f'Surface tension gamma: {round(opti_params.get_surface_tension(), 3)} mN/m')
+        print(f'Surface tension gamma: {round(opti_params.get_surface_tension_mN(), 3)} mN/m')
 
         if args.o is not None:
             from . import plot

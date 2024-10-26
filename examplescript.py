@@ -25,17 +25,17 @@ pxldensity = 57.0
 estimated_parameters = ppd.estimate_parameters(image, contour, pxldensity)
 
 # Set manually an estimation of the capillary length
-estimated_parameters.set_l_mm(2.65)
+estimated_parameters.set_caplength_mm(2.65)
 
 # Print the estimated parameters in the console
-estimated_parameters.describe(name='estimated')
+estimated_parameters.describe(descriptor='estimated')
 
 # 6. Optimize these parameters
 optimization_successful, optimized_parameters = ppd.optimize_profile(contour, estimated_parameters)
 
 if optimization_successful:
     # Print the optimized parameters in the console
-    optimized_parameters.describe(name='optimized')
+    optimized_parameters.describe(descriptor='optimized')
 
     # Print the bond number corresponding to the drop
     print(f'Bond number: {round(optimized_parameters.get_bond(), 3)}')
@@ -45,7 +45,7 @@ if optimization_successful:
     optimized_parameters.set_densitycontrast(rhog)
 
     # 7. Compute the surface tension
-    print(f'Surface tension gamma: {round(optimized_parameters.get_surface_tension(), 3)} mN/m')
+    print(f'Surface tension gamma: {round(optimized_parameters.get_surface_tension_mN(), 3)} mN/m')
 else:
     print('Optimization failed :(')
 

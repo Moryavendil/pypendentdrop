@@ -179,8 +179,8 @@ def detect_contourlines(image:np.ndarray, level:float, roi:Roi=None) -> List[np.
 def detect_main_contour(image:np.ndarray, level:float, roi:Roi=None) -> np.ndarray:
     """Returns the main (longest) closed line enclosing a region in ``image`` that is above ``level``.
 
-    Finds the longest of all `contour lines <pypendentdrop.otsu_intraclass_variance>` above a specific level,
-    and returns its transposition.
+    Finds the longest of all `contour lines <pypendentdrop.detect_contourlines>` above a specific level,
+    and returns its transposition, so that it is of shape (2, N).
 
     Parameters
     ----------
