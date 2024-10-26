@@ -636,6 +636,11 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
         method = 'Nelder-Mead'
     if to_fit is None:
         to_fit = [True, True, True, True, True]
+    if maxiter is None:
+        if method == 'Powell':
+            maxiter = 100
+        elif method == 'Nelder-Mead':
+            maxiter = 2000 # should not take long
 
     default_bounds = [(None, None),  # gravity_angle
                       (None, None),  # y_tip_position
