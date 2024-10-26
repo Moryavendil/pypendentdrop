@@ -9,10 +9,13 @@ PyPendentDrop documentation
 Python library (with graphical and command line interfaces) to measure surface tension from images of pendent drops.
 
 * Package on `PyPI <https://pypi.org/project/pypendentdrop>`_
+* Documentation on `ReadTheDocs <https://pypendentdrop.readthedocs.io>`_
 * Source code on `GitHub <https://github.com/Moryavendil/pypendentdrop>`_
 
 
 PyPendentDrop is heavily inspired from the `Pendent Drop ImageJ plugin <https://github.com/adaerr/pendent-drop>`_.
+
+If you wish to contribute (there are a certain number of things to do in the todo.md file on the GitHub repository), you can contact me by writing at ``pypendentdrop@protonmail.com``.
 
 .. toctree::
    :maxdepth: 1
@@ -22,4 +25,5 @@ PyPendentDrop is heavily inspired from the `Pendent Drop ImageJ plugin <https://
    howtouse
    method
    API
+
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pypendentdrop as ppd
 
 # the path to the image file

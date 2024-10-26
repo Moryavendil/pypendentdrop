@@ -2,8 +2,9 @@
 
 Python library (with graphical and command line interfaces) to measure surface tension from images of pendent drops.
 
-* On PyPI: [https://pypi.org/project/pypendentdrop/](https://pypi.org/project/pypendentdrop/)
-* Source code: [https://github.com/Moryavendil/pypendentdrop](https://github.com/Moryavendil/pypendentdrop)
+* Package on [PyPI](https://pypi.org/project/pypendentdrop/)
+* Documentation on [ReadTheDocs](https://pypendentdrop.readthedocs.io)
+* Source code on  [GitHub](https://github.com/Moryavendil/pypendentdrop)
 
 
 ## Installation
@@ -14,7 +15,7 @@ Simply use
 
 or, if you only want to use the command-line version (resp. the graphical version), you can replace `[full]` by `[cli]` (resp. `[gui]`). Use no option to download a minimal working version of the library.
 
-## Use PyPendentDrop
+## Using PyPendentDrop
 
 ### Graphical interface
 
@@ -22,9 +23,7 @@ To launch the gui version, use the command
 
     ppt-gui
 
-or, alternatively, 
-
-    python -m pypendentdrop.gui
+Use the relevant fields to provide an image, the pixel density of your image and the relevant physical parameters (density contrast, acceleration of gravity). Buttons allow you to estimate the parameters coarsely and to optimize this estimation. You can manually change and/or fix the values of the parameters.
 
 ### Command-line
 
@@ -32,27 +31,23 @@ To use the command-line version, use
 
     ppt-cli
 
-or, alternatively, 
-
-    python -m pypendentdrop
-
-Use the `-h` option to list the availables options. If you use the `-o` option (graph generation), ensure that you have matplotlib installed.
+Use the `-h` (help) option to list the availables options and the `-v` (verbose) option to display more information as the program goes.
 
 ### In a python script
 
-In the import section, write
+In the import section of your script, write
 
     import pypendentdrop as ppd
 
 and you can then use the functions defined in the library. An example script `examplescript.py` is provided on the GitHub repository. 
 
-## How it works
+<!-- ## How it works
 
 ### The pendent drop method
 
 [...] see scientific litterature
 
-### Using PyPendentDrop
+### PyPendentDrop
 
 The main steps of measuring the surface tension of a liquid using the pendent drop method are
 
@@ -72,30 +67,8 @@ The main steps of measuring the surface tension of a liquid using the pendent dr
 
 6. Fit the drop profile using the estimated parameters as initial condition using `ppd.optimize_profile(contour, estimated_parameters)`
 
-7. Knowing the density contrast (density difference between the fluids times gravity acceleration), compute the surface tension.
-
-<!--
-## Dependencies
-
-* The PypendentDrop library rely on
-
- * `numpy` (for algebra)
- * `pillow` (for image reading via `Image.open()`)
- * `contourpy` (for contour detection via `ContourGenerator.lines()`)
- * `scipy` (for parameters optimization via `minimize`)
-
-* The graphical application depends on
-
- * `pyqtgraph` (fast responsive graphs)
- * Any Qt distribution for Python supported by PyQtGraph: `PyQt6`, `PySide6`, `PyQt5` or `PySide2` (when using the `[gui]` option, `PyQt5` is installed) 
- 
-* The command-line application depends on
- * `matplotlib`, when requesting graphs to be plotted (see `-o` option for `ppt-cli`)
-
-to test the module, you can run (from the main directory)
-
-    python -m pypendentdrop -n src/pypendentdrop/tests/testdata/water_2.tif -p 57 -g 9.81 -v -->
+7. Knowing the density contrast (density difference between the fluids times gravity acceleration), compute the surface tension. -->
 
 ## Contact
 
-if needed: contact me at `pypendentdrop@protonmail.com`
+Contact me at `pypendentdrop@protonmail.com`

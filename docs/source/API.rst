@@ -1,7 +1,7 @@
 API Reference
 ========================
 
-Contents:
+On this page:
 
 `Image import`_
 

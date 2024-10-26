@@ -59,7 +59,7 @@ or
 
    $ python -m pypendentdrop.gui
 
-Use the ``-h`` option to list the availables options. You need to have ``matplotlib`` installed to use the ``-o`` option (graph generation).
+Use the ``-h`` option to list the available options. You need to have ``matplotlib`` installed to use the ``-o`` option (graph generation).
 
 PyPendentGraph API
 ~~~~~~~~~~~~~~~~~~~~
@@ -70,4 +70,4 @@ Of course, you can use all the functions provided by the PyPendentGraph library 
 
     import pypendentdrop as ppd
 
-and you can then use the functions defined in the library (see the API reference to understand what each function does). An example script, ``examplescript.py``, using some of the PyPendentDrop functionalities, is available `in the GitHub repository <https://github.com/Moryavendil/pypendentdrop>`_.
+and you can then use the functions defined in the library (see the API Reference to understand what each function does). An example script, ``examplescript.py``, using some of the PyPendentDrop functionalities, is available `in the GitHub repository <https://github.com/Moryavendil/pypendentdrop>`_.
