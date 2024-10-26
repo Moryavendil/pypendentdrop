@@ -26,7 +26,7 @@ The main steps of measuring the surface tension of a liquid via PyPendentDrop ar
 
 
 Start PyPendentDrop
---------------
+--------------------
 
 Graphical app
 ~~~~~~~~~~~~~~~~~~~~
