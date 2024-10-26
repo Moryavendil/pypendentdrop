@@ -12,7 +12,7 @@ Simply use
 
     pip install pypendentdrop[full]
 
-or, if you only want to use the command-line version (resp. the graphical version), you can replace `[full]` by `[cli]` (resp. `[gui]`). See [dependencies](#dependencies) for the difference between these options. Use no option to download a minimal working version of the library.
+or, if you only want to use the command-line version (resp. the graphical version), you can replace `[full]` by `[cli]` (resp. `[gui]`). Use no option to download a minimal working version of the library.
 
 ## Use PyPendentDrop
 
@@ -74,6 +74,7 @@ The main steps of measuring the surface tension of a liquid using the pendent dr
 
 7. Knowing the density contrast (density difference between the fluids times gravity acceleration), compute the surface tension.
 
+<!--
 ## Dependencies
 
 * The PypendentDrop library rely on
@@ -93,7 +94,7 @@ The main steps of measuring the surface tension of a liquid using the pendent dr
 
 to test the module, you can run (from the main directory)
 
-    python -m pypendentdrop -n src/pypendentdrop/tests/testdata/water_2.tif -p 57 -g 9.81 -v
+    python -m pypendentdrop -n src/pypendentdrop/tests/testdata/water_2.tif -p 57 -g 9.81 -v -->
 
 ## Contact
 
