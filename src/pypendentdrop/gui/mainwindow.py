@@ -58,8 +58,8 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         ### MEASUREMENT TAB
         ## GUESS + FIT
         self.analysisTabs.setTabEnabled(1, False)
-        self.pixelDensitySpinBox.editingFinished.connect(self.harmonizePixelSpacing)
-        self.pixelSizeSpinbox.editingFinished.connect(self.harmonizePixelDensity)
+        self.pixelDensitySpinBox.editingFinished.connect(self.pixelDensityChanged)
+        self.pixelSizeSpinbox.editingFinished.connect(self.pixelSpacingChanged)
         self.autoGuessPushButton.clicked.connect(self.guessParameters)
 
 
@@ -153,31 +153,35 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
     ### ESTIMATE PARAMETERS
 
-    def harmonizePixelDensity(self, pixelSpacing:Optional[float]=None):
+    def pixelSpacingChanged(self, pixelSpacing:Optional[float]=None):
         if pixelSpacing is None:
             pixelSpacing = self.pixelSizeSpinbox.value()
-        ppd.debug(f'harmonizePixelDensity with spacing={pixelSpacing} px/mm')
-        self.pixelDensitySpinBox.editingFinished.disconnect(self.harmonizePixelSpacing)
+        ppd.debug(f'pixelSpacingChanged with spacing={pixelSpacing} px/mm')
+        self.pixelDensitySpinBox.editingFinished.disconnect(self.pixelDensityChanged)
 
         self.parameters.set_px_spacing(pixelSpacing)
         self.pixelDensitySpinBox.setValue(self.parameters.get_px_density() or 0)
 
+        self.pixelDensitySpinBox.editingFinished.connect(self.pixelDensityChanged)
+
+        self.applyParameters() # actualize r0_mm and lc_mm
+
         self.autoGuessPushButton.setEnabled(self.parameters.can_estimate())
 
-        self.pixelDensitySpinBox.editingFinished.connect(self.harmonizePixelSpacing)
-
-    def harmonizePixelSpacing(self, pixelDensity:float=None):
+    def pixelDensityChanged(self, pixelDensity:float=None):
         if pixelDensity is None:
             pixelDensity = self.pixelDensitySpinBox.value()
-        ppd.debug(f'harmonizePixelSpacing with density={pixelDensity} px/mm')
-        self.pixelSizeSpinbox.editingFinished.disconnect(self.harmonizePixelDensity)
+        ppd.debug(f'pixelDensityChanged with density={pixelDensity} px/mm')
+        self.pixelSizeSpinbox.editingFinished.disconnect(self.pixelSpacingChanged)
 
         self.parameters.set_px_density(pixelDensity)
         self.pixelSizeSpinbox.setValue(self.parameters.get_px_spacing() or 0)
 
-        self.autoGuessPushButton.setEnabled(self.parameters.can_estimate())
+        self.pixelSizeSpinbox.editingFinished.connect(self.pixelSpacingChanged)
 
-        self.pixelSizeSpinbox.editingFinished.connect(self.harmonizePixelDensity)
+        self.applyParameters() # actualize r0_mm and lc_mm
+
+        self.autoGuessPushButton.setEnabled(self.parameters.can_estimate())
 
     def angleg_manualchange(self, angleg:Optional[float]=None):
         if angleg is None:
