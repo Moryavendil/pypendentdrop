@@ -14,6 +14,7 @@ build:
 sphinx:
   configuration: docs/source/conf.py
   # Fail on all warnings to avoid broken references
+  # We don't do it because of some error about static html path of whatever
   # fail_on_warning: true
 
 
