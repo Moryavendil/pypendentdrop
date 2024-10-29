@@ -192,8 +192,11 @@ def main():
         print(f'Surface tension gamma: {round(opti_params.get_surface_tension_mN(), 3)} mN/m')
 
         if args.o is not None:
-            from . import plot
-            plot.generate_figure(img, cnt, parameters=opti_params,
-                                 prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
+            try:
+                from . import plot
+                plot.generate_figure(img, cnt, parameters=opti_params,
+                                     prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
+            except ImportError:
+                raise ImportError("Using the `-o` option requires matplotlib; which could not be imported (try `pip install matplotlib`).")
 
     sys.exit(0)

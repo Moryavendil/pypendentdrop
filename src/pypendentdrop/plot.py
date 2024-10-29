@@ -1,5 +1,10 @@
-
 from . import *
+
+try:
+    mpl = 'matplotlib'
+    __import__(mpl)
+except ImportError:
+    raise ImportError("PyPendentDrop plotting module requires matplotlib; which could not be imported (try `pip install matplotlib`).")
 
 import numpy as np
 import matplotlib.pyplot as plt
