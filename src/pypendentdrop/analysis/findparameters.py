@@ -121,7 +121,6 @@ class Parameters():
 
     ### TIP POSITION LONG VERSION
     def set_xtippos_px(self, x_tip_position_px:float) -> None:
-        """Get the x position of the tip, in pixels. Use ``set_xytippos_px`` to set it."""
         self._x_px = x_tip_position_px
     def get_xtippos_px(self) -> float:
         return self._x_px
@@ -160,12 +159,10 @@ class Parameters():
 
     ### CAPILLARY LENGTH SHORT VERSION
     def get_l_px(self) -> float:
-        """An alias of :meth:`get_caplength_px <pypendentdrop.get_caplength_px>`."""
         return self._l_px
     def set_l_px(self, lcap_px:float) -> None:
         self._l_px = lcap_px
     def get_l_mm(self) -> float:
-        """An alias of :meth:`get_caplength_mm <pypendentdrop.get_caplength_mm>`."""
         return None if (self._px_per_mm is None or self._l_px is None) else self._l_px / self._px_per_mm
     def set_l_mm(self, lcap_mm:float) -> None:
         self._l_px = None if (lcap_mm is None or self._px_per_mm is None) else lcap_mm * self._px_per_mm
@@ -537,7 +534,7 @@ def compute_gap_dimensionless(contour:np.ndarray, parameters:Parameters) -> floa
 
     Returns
     -------
-    gap : float
+    gap_dimensionless : float
 
     """
     fitparams:Fitparams = parameters.get_fitparams()
@@ -555,7 +552,7 @@ def compute_gap_pixel(contour:np.ndarray, parameters:Parameters) -> float:
 
     Returns
     -------
-    gap : float
+    gap_in_squared_px : float
 
     """
     l_px = parameters.get_l_px()
