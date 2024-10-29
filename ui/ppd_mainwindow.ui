@@ -98,7 +98,14 @@
            <item row="0" column="1">
             <layout class="QHBoxLayout" name="imageFileHLayout">
              <item>
-              <widget class="QLineEdit" name="imageFileLineEdit"/>
+              <widget class="QLineEdit" name="imageFileLineEdit">
+               <property name="inputMask">
+                <string/>
+               </property>
+               <property name="placeholderText">
+                <string>Select an image file</string>
+               </property>
+              </widget>
              </item>
              <item>
               <widget class="QPushButton" name="imageFileBrowsePushButton">
@@ -655,16 +662,16 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <layout class="QHBoxLayout" name="rhogHLayout">
-             <item>
-              <widget class="QLabel" name="rhogLabel">
+            <layout class="QFormLayout" name="formLayout_5">
+             <item row="0" column="0">
+              <widget class="QLabel" name="gLabel">
                <property name="text">
-                <string>density x gravity (g x Delta rho)</string>
+                <string>Acceleration of gravity</string>
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="rhogSpinBox">
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="gSpinBox">
                <property name="baseSize">
                 <size>
                  <width>200</width>
@@ -677,6 +684,9 @@
                <property name="buttonSymbols">
                 <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
                </property>
+               <property name="suffix">
+                <string> m/s²</string>
+               </property>
                <property name="decimals">
                 <number>3</number>
                </property>
@@ -685,6 +695,35 @@
                </property>
                <property name="value">
                 <double>9.805999999999999</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="dSpinBox">
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::ButtonSymbols::NoButtons</enum>
+               </property>
+               <property name="suffix">
+                <string> kg/l</string>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <double>1000000000.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="dLabel">
+               <property name="text">
+                <string>Density difference Δρ</string>
                </property>
               </widget>
              </item>

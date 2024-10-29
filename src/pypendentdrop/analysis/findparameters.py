@@ -36,12 +36,14 @@ class Parameters():
         self._l_px: Optional[float] = None
 
         self._px_per_mm: Optional[float] = None
-        self._rhog: Optional[float] = None
+        self._d: Optional[float] = None # delta rho in kg/l
+        self._g: Optional[float] = None # g in m/s2
 
     def __repr__(self) -> str:
         return f""" 
         pixel density: {roundifnotnone(self.get_px_density(), digits=2, unit='px/mm')}
-        rho g: {roundifnotnone(self.get_densitycontrast(), digits=3)}
+        gravity: {roundifnotnone(self.get_gravityacc(), digits=3)}
+        Delta rho: {roundifnotnone(self.get_densitycontrast(), digits=3)}
         -----
         gravity_angle: {roundifnotnone(self.get_a_deg(), digits=2, unit='deg')} ({roundifnotnone(self.get_a_rad(), digits=4, unit='rad')})
         x_tip_position: {roundifnotnone(self.get_x_px(), digits=2, unit='px')}
@@ -50,7 +52,7 @@ class Parameters():
         capillary_length: {roundifnotnone(self.get_l_mm(), digits=4, unit='mm')} ({roundifnotnone(self.get_l_px(), digits=2, unit='px')})
         """
     def __str__(self) -> str:
-        return f"(px_per_mm={self.get_px_density()} ; rhog={self.get_g()} | a={self.get_a_deg()} deg; x={self.get_x_px()} px; y={self.get_y_px()} px; r={self.get_r_mm()} mm; l={self.get_l_mm()} mm)"
+        return f"(px_per_mm={self.get_px_density()} ; g={self.get_g()} ; Deltarho={self.get_d()} | a={self.get_a_deg()} deg; x={self.get_x_px()} px; y={self.get_y_px()} px; r={self.get_r_mm()} mm; l={self.get_l_mm()} mm)"
 
     def describe(self, printfn=print, descriptor = None) -> None:
         """Prints the parameters in the console in a human-friendly fashion.
@@ -77,11 +79,6 @@ class Parameters():
         return None if ((self._px_per_mm or 0) == 0) else 1/self._px_per_mm
     def set_px_spacing(self, pixel_spacing:float) -> None:
         self._px_per_mm = None if ((pixel_spacing or 0) == 0) else 1/pixel_spacing
-
-    def set_densitycontrast(self, rhog:Optional[float]) -> None:
-        self._rhog = rhog
-    def get_densitycontrast(self) -> float:
-        return self._rhog
 
     ### ANGLE OF GRAVITY SHORT VERSION
     def get_a_rad(self) -> float:
@@ -179,6 +176,31 @@ class Parameters():
     def set_caplength_px(self, lcap_px:float) -> None:
         self.set_l_px(lcap_px=lcap_px)
 
+    ### GRAVITY ACCELERATION SHORT VERSION
+    def set_g(self, gravacc_ms2:Optional[float]) -> None:
+        self._g = gravacc_ms2
+    def get_g(self):
+        return self._g
+
+    ### GRAVITY ACCELERATION LONG VERSION
+    def set_gravityacc(self, gravacc_ms2:Optional[float]) -> None:
+        self._g = gravacc_ms2
+    def get_gravityacc(self):
+        """Get the acceleration of gravity, in m/s^2 (typically 9.81). Use ``set_gravityacc`` to set it."""
+        return self._g
+
+    ### DENSITY CONTRAST SHORT VERSION
+    def set_d(self, densitycontrast_kgL:Optional[float]) -> None:
+        self._d = densitycontrast_kgL
+    def get_d(self):
+        return self._d
+
+    ### DENSITY CONTRAST LONG VERSION
+    def set_densitycontrast(self, densitycontrast_kgL:Optional[float]) -> None:
+        self._d = densitycontrast_kgL
+    def get_densitycontrast(self):
+        """Get the density contrast between the fluids, in kg/L (typically 1 for water/air). Use ``set_densitycontrast`` to set it."""
+        return self._d
     def get_dimensionlessTipRadius(self):
         return None if (self._r_px is None or self._l_px is None) else self._r_px / self._l_px
 
@@ -204,13 +226,9 @@ class Parameters():
         """Returns the Bond number (square of the (tip radius)/(capillary length) ratio)"""
         return None if (self._r_px is None or self._l_px is None) else (self._r_px / self._l_px)**2
 
-    def set_g(self, rhog:Optional[float]) -> None:
-        self._rhog = rhog
-    def get_g(self):
-        return self._rhog
     def get_surface_tension_mN(self):
         """Returns the surface tension in mN (or None if it cannot be computed)."""
-        return None if (self._rhog is None or self.get_l_mm() is None) else (self._rhog * self.get_l_mm()**2)
+        return None if ((self.get_g() is None) or (self.get_d() is None) or (self.get_l_mm() is None)) else (self.get_d() * self.get_g() * self.get_l_mm()**2)
 
 
 # paremeters
@@ -684,9 +702,12 @@ def optimize_profile(contour:np.ndarray, parameters_initialguess:Parameters,
 
 
     # copy `by hand'
+    # todo implement a copy method for the Parameters class and use it here
     parameters_opti = Parameters()
     parameters_opti.set_px_density(parameters_initialguess.get_px_density())
-    parameters_opti.set_densitycontrast(parameters_initialguess.get_densitycontrast())
+    parameters_opti.set_g(parameters_initialguess.get_g())
+    parameters_opti.set_d(parameters_initialguess.get_d())
+    # update with the optimized values
     parameters_opti.set_a_rad(minimization.x[0])
     parameters_opti.set_x_px(minimization.x[1])
     parameters_opti.set_y_px(minimization.x[2])

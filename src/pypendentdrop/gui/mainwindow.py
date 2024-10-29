@@ -5,7 +5,7 @@ import numpy as np
 # from pyqtgraph.Qt.QtGui import QPixmap
 from pyqtgraph.Qt.QtWidgets import QMainWindow, QFileDialog
 
-import pypendentdrop as ppd
+from .. import *
 
 from .mainwindow_ui import Ui_PPD_MainWindow
 from .plotwidget import ppd_plotWidget
@@ -69,11 +69,13 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         self.r0SpinBox.valueChanged.connect(self.r0_manualchange)
         self.caplengthSpinBox.valueChanged.connect(self.caplength_manualchange)
 
-        self.parameters:ppd.Parameters = ppd.Parameters()
+        self.parameters:Parameters = Parameters()
         self.applyParameters()
 
-        self.rhogSpinBox.valueChanged.connect(self.rhog_manualchange)
-        self.rhog_manualchange()
+        self.gSpinBox.valueChanged.connect(self.g_manualchange)
+        self.dSpinBox.valueChanged.connect(self.d_manualchange)
+        self.g_manualchange()
+        self.d_manualchange()
 
         self.optimizePushButton.clicked.connect(self.optimizeParameters)
 
@@ -88,7 +90,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         
         if dialog.exec():
             fileName = dialog.selectedFiles()[0]
-            ppd.debug(f'choose_image_file: Dialog-selected file name: {fileName}')
+            debug(f'choose_image_file: Dialog-selected file name: {fileName}')
             self.imageFileLineEdit.setText(fileName)
             
             if self.plotWidget.load_image(filepath=fileName):
@@ -132,7 +134,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         if autoThreshold is None:
             autoThreshold = self.autoThresholdCheckBox.isChecked()
         if autoThreshold:
-            threshold = ppd.best_threshold(self.plotWidget.iso.data, self.plotWidget.iso.roi)
+            threshold = best_threshold(self.plotWidget.iso.data, self.plotWidget.iso.roi)
             self.customThresholdSpinBox.setValue(threshold)
         self.thresholdChanged()
 
@@ -156,7 +158,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
     def pixelSpacingChanged(self, pixelSpacing:Optional[float]=None):
         if pixelSpacing is None:
             pixelSpacing = self.pixelSizeSpinbox.value()
-        ppd.debug(f'pixelSpacingChanged with spacing={pixelSpacing} px/mm')
+        debug(f'pixelSpacingChanged with spacing={pixelSpacing} px/mm')
         self.pixelDensitySpinBox.editingFinished.disconnect(self.pixelDensityChanged)
 
         self.parameters.set_px_spacing(pixelSpacing)
@@ -171,7 +173,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
     def pixelDensityChanged(self, pixelDensity:float=None):
         if pixelDensity is None:
             pixelDensity = self.pixelDensitySpinBox.value()
-        ppd.debug(f'pixelDensityChanged with density={pixelDensity} px/mm')
+        debug(f'pixelDensityChanged with density={pixelDensity} px/mm')
         self.pixelSizeSpinbox.editingFinished.disconnect(self.pixelSpacingChanged)
 
         self.parameters.set_px_density(pixelDensity)
@@ -244,10 +246,9 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
 
             mainContour = self.plotWidget.isoCurve_level(level=threshold)
 
-            self.parameters = ppd.estimate_parameters(np.array(self.plotWidget.iso.data), mainContour, px_per_mm=px_per_mm)
-            self.rhog_manualchange()
-
-            self.parameters.describe(printfn=ppd.info, descriptor='estimated')
+            self.parameters = estimate_parameters(np.array(self.plotWidget.iso.data), mainContour, px_per_mm=px_per_mm)
+            self.g_manualchange() ; self.d_manualchange() # update with the values of physical parameters
+            self.parameters.describe(printfn=info, descriptor='estimated')
 
             self.applyParameters()
 
@@ -273,14 +274,12 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
                     self.tipxCheckBox.isChecked(),
                     self.r0CheckBox.isChecked(),
                     self.caplengthCheckBox.isChecked()]
-            ppd.trace(f'optimizeParameters: to_fit={to_fit} (from checkboxes)')
+            trace(f'optimizeParameters: to_fit={to_fit} (from checkboxes)')
 
-            opti_success, self.parameters = ppd.optimize_profile(mainContour, parameters_initialguess=self.parameters, to_fit=to_fit)
-
-            self.parameters.describe(printfn=ppd.info, descriptor='optimized')
+            opti_success, self.parameters = optimize_profile(mainContour, parameters_initialguess=self.parameters, to_fit=to_fit)
+            self.parameters.describe(printfn=info, descriptor='optimized')
 
             self.applyParameters()
-            self.actualizeSurfaceTension()
 
     def actualizeComputedCurve(self):
         if self.parameters.can_show_tip_position():
@@ -288,23 +287,28 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         else:
             self.plotWidget.hide_scatter_droptip()
         if self.canComputeProfile():
-            R, Z = ppd.integrated_contour(self.parameters)
+            R, Z = integrated_contour(self.parameters)
 
             self.plotWidget.plot_computed_profile(R, Z)
         else:
             self.plotWidget.hide_computed_profile()
 
     ### PHYSICS
-    def rhog_manualchange(self, rhog:Optional[float]=None):
-        if rhog is None:
-            rhog = self.rhogSpinBox.value()
-        self.parameters.set_densitycontrast(rhog)
+    def g_manualchange(self, g:Optional[float]=None):
+        if g is None:
+            g = self.gSpinBox.value()
+        self.parameters.set_g(g)
+        self.actualizeSurfaceTension()
+    def d_manualchange(self, d:Optional[float]=None):
+        if d is None:
+            d = self.dSpinBox.value()
+        self.parameters.set_d(d)
         self.actualizeSurfaceTension()
 
     def actualizeSurfaceTension(self):
         if self.canComputeProfile():
-            self.gammaSpinBox.setValue(self.parameters.get_surface_tension_mN() or 0)
             self.bondSpinBox.setValue(self.parameters.get_bond() or 0)
+            self.gammaSpinBox.setValue(self.parameters.get_surface_tension_mN() or 0)
 
 
 

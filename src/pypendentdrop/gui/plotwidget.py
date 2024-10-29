@@ -4,7 +4,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt.QtCore import QRectF
 from pyqtgraph.Qt import QtGui
 
-import pypendentdrop as ppd
+from .. import *
 
 # Interpret image data as row-major instead of col-major
 pg.setConfigOptions(imageAxisOrder='row-major')
@@ -21,7 +21,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
     def setROI(self, ROIpos, ROIsize):
         self.roi = [int(ROIpos[0]), int(ROIpos[1]),
                     int(ROIpos[0]+ROIsize[0]), int(ROIpos[1]+ROIsize[1])] # TLx, TLy, BRx, BRy
-        ppd.trace(f'isoCurve: setROI: roi is now {self.roi}')
+        trace(f'isoCurve: setROI: roi is now {self.roi}')
 
         self.generatePath()
         self.update()
@@ -38,7 +38,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
         data = self.data
 
         # lines = pg.isocurve(data, self.level, connected=True, extendToEdge=True)
-        lines = ppd.detect_contourlines(data, self.level, roi=self.roi)
+        lines = detect_contourlines(data, self.level, roi=self.roi)
         self.path = QtGui.QPainterPath()
         for line in lines:
             self.path.moveTo(*line[0])
@@ -74,7 +74,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         # self.show()
         
     def load_image(self, filepath:str = None) -> bool:
-        success, self.data = ppd.import_image(filepath)
+        success, self.data = import_image(filepath)
             
         self.imgheight, self.imgwidth = self.data.shape
         self.imageItem.clear()
@@ -89,7 +89,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
             ROIsize = [self.imgwidth*self.initialROIfract, self.imgheight*self.initialROIfract]
             ROIpos = np.array(ROIpos).astype(int)
             ROIsize = np.array(ROIsize).astype(int)
-            ppd.trace(f'plotWidget: load_image: ROI position = {ROIpos} | ROI size = {ROIsize}')
+            trace(f'plotWidget: load_image: ROI position = {ROIpos} | ROI size = {ROIsize}')
             ROImaxBounds = QRectF(0-.5, 0-.5, self.imgwidth+1, self.imgheight+1)
             self.roi.maxBounds = ROImaxBounds
             self.roi.setPos(ROIpos)
@@ -190,7 +190,7 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         if level is None:
             level = self.defaultLevel
         self.isoCtrlLine.setValue(level)
-        return ppd.detect_main_contour(self.iso.data, level, roi=self.iso.roi)
+        return detect_main_contour(self.iso.data, level, roi=self.iso.roi)
 
     def plot_computed_profile(self, x, y):
 

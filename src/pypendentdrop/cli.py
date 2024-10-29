@@ -25,11 +25,12 @@ def main():
 
     parser = argparse.ArgumentParser(
         prog='ppd_commandLine',
-        description='PyPendentDrop - Command line version',
+        description='PyPendentDrop - Command Line Interface',
         epilog=f'', add_help=True)
     parser.add_argument('-n', metavar='FILENAME', help='filename', type=argparse.FileType('rb'))
     parser.add_argument('-p', metavar='PXL_DENSITY', help='Pixel density (mm/px)', type=float)
-    parser.add_argument('-g', metavar='RHOG', help='Value of rho*g/1000 (typically 9.81)', type=float)
+    parser.add_argument('-g', metavar='G', help='Acceleration of gravity (typically 9.81)', type=float)
+    parser.add_argument('-d', metavar='DELTARHO', help='Density contrast, in kg/L (typically 1.00 for water/air)', type=float)
     parser.add_argument('-o', metavar='OUTPUTFILE', help='Generate graphs [optional:file prefix]', type=str, nargs='?', const='drop', default = None)
     parser.add_argument('-v', help='Verbosity (-v: info, -vv: logger.debug, -vvv: trace)', action="count", default=0)
 
@@ -66,7 +67,7 @@ def main():
     if imagefile is None:
         logger.info(f'No image file provided.')
         logger.info(f'You can use the -n option to specify the image you want to analyze.')
-        logger.info(f'Example: pypendantdrop-cli -n image.tif)')
+        logger.info(f'Example: ppd-cli -n image.tif)')
 
     import_success, img = import_image(imagefile)
     while not import_success:
@@ -83,7 +84,7 @@ def main():
     if px_per_mm is None:
         logger.info(f'No pixel density provided.')
         logger.info(f'You can use the -p option specify the pixel density, in px/mm.')
-        logger.info(f'Example: pypendantdrop-cli -p 57.0)')
+        logger.info(f'Example: ppd-cli -p 57.0)')
 
     while not(is_valid_float(px_per_mm)):
         if px_per_mm is None:
@@ -173,22 +174,37 @@ def main():
         print(f'Bond number: {round(opti_params.get_bond(), 3)}')
 
         ### Getting the contrast density
-        rhog = args.g
-        logger.debug(f'Density contrast provided: {rhog} px/mm')
-        if rhog is None:
-            logger.info(f'No density contrast provided.')
-            logger.info(f'You can use the -g option specify the density contrast (density difference times g).')
-            logger.info(f'Example (for water): pypendantdrop-cli -g 9.81)')
+        g = args.g
+        logger.debug(f'Gravity acceleration provided: {g} m/s2')
+        if g is None:
+            logger.info(f'No gravity acceleration provided.')
+            logger.info(f'You can use the -g option specify the gravity acceleration (in m/s^2).')
+            logger.info(f'Example (for Paris): ppd-cli -g 9.81)')
+        while not(is_valid_float(g)):
+            if g is None:
+                print(f'No gravity acceleration provided.')
+            print('Please provide a valid gravity acceleration for the image you want to analyze')
+            g:str = str(input('Gravity acceleration (m/s^2): '))
+            logger.debug(f'Gravity acceleration provided: {g} m/s2')
+        g:float = float(g)
+        opti_params.set_g(g)
 
-        while not(is_valid_float(rhog)):
-            if rhog is None:
+
+        d = args.d
+        logger.debug(f'Density contrast provided: {d} kg/L')
+        if d is None:
+            logger.info(f'No density contrast provided.')
+            logger.info(f'You can use the -d option specify the density contrast (density difference between the fluids, in kg/L).')
+            logger.info(f'Example (for water in air): ppd-cli -d 1.00)')
+        while not(is_valid_float(d)):
+            if d is None:
                 print('No density contrast provided.')
             print('Please provide a valid density contrast for the image you want to analyze')
-            rhog:str = str(input('Density contrast: '))
-            logger.debug(f'Density contrast provided: {rhog}')
-        rhog:float = float(rhog)
+            d:str = str(input('Density contrast (kg/L): '))
+            logger.debug(f'Density contrast provided: {d}')
+        d:float = float(d)
+        opti_params.set_d(d)
 
-        opti_params.set_densitycontrast(rhog)
         print(f'Surface tension gamma: {round(opti_params.get_surface_tension_mN(), 3)} mN/m')
 
         if args.o is not None:
