@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [
   { name="G2L", email="GDoubleL@proton.me" },
 ]
-description = "Python scripts (GUI and command line) to measure surface tension from images of pendent drops."
+description = "Open-source Python API with a graphical and command-line interface to measure surface tension coefficients from images of pendent drops."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [

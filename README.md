@@ -1,6 +1,6 @@
 # PyPendentDrop
 
-Python library (with graphical and command line interfaces) to measure surface tension from images of pendent drops.
+Open-source Python API with a graphical and command-line interface to measure surface tension coefficients from images of pendent drops.
 
 * Package on [PyPI](https://pypi.org/project/pypendentdrop/)
 * Documentation on [ReadTheDocs](https://pypendentdrop.readthedocs.io)
