@@ -4,7 +4,7 @@
 from . import *
 import sys
 from . import logfacility
-from ppd_parse import generate_parser
+from .ppd_parse import generate_parser
 
 def is_valid_float(element: any) -> bool:
     if element is None:

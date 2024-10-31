@@ -8,7 +8,7 @@ def generate_parser(program_name:str=None):
         epilog=f'', add_help=True)
     parser.add_argument('-n', metavar='FILENAME', help='filename', type=argparse.FileType('rb'))
     parser.add_argument('-p', metavar='PXL_DENSITY', help='Pixel density (mm/px)', type=float)
-    parser.add_argument('-g', metavar='G', help='Acceleration of gravity (typically 9.81)', type=float)
+    parser.add_argument('-g', metavar='GRAVITY', help='Acceleration of gravity (typically 9.81)', type=float)
     parser.add_argument('-d', metavar='DELTARHO', help='Density contrast, in kg/L (typically 1.00 for water/air)', type=float)
     parser.add_argument('-o', metavar='OUTPUTFILE', help='Generate graphs [optional:file prefix]', type=str, nargs='?', const='drop', default = None)
     parser.add_argument('-v', help='Verbosity (-v: info, -vv: logger.debug, -vvv: trace)', action="count", default=0)
