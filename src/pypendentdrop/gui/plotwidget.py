@@ -17,6 +17,7 @@ class IsocurveItemWithROI(pg.IsocurveItem):
     def __init__(self, offset=None):
         super().__init__(self)
         self.roi = [0,0, None, None] # TLx, TLy, BRx, BRy
+        self.imgheight, self.imgwidth = None, None
 
     def setROI(self, ROIpos, ROIsize):
         self.roi = [int(ROIpos[0]), int(ROIpos[1]),
@@ -74,6 +75,17 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         # self.show()
         
     def load_image(self, filepath:str = None) -> bool:
+        """Tries to load an image to the widget
+
+        Parameters
+        ----------
+        filepath
+
+        Returns
+        -------
+        success
+
+        """
         success, self.data = import_image(filepath)
             
         self.imgheight, self.imgwidth = self.data.shape
@@ -110,12 +122,12 @@ class ppd_plotWidget(pg.GraphicsLayoutWidget):
         if level is None:
             level = self.defaultLevel
         ### ISOCURVE
-        self.iso = IsocurveItemWithROI()
+        self.iso:IsocurveItemWithROI = IsocurveItemWithROI()
         self.iso.setPen(pg.mkPen(color='g', width=2))
         self.iso.setLevel(level)
         self.iso.setParentItem(self.imageItem)
         self.iso.setZValue(5)
-        # We can also use smnoothed data for the isoline, giving smoother results: 
+        # We can also use smoothed data for the isoline, giving smoother results:
         # self.iso.setData(pg.gaussianFilter(data, (2, 2)))
         # Here we decide to use the raw data
         self.iso.setData(self.data) 

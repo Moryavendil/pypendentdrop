@@ -46,6 +46,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         ### IMAGE AND THRESHOLD TAB
         ## IMAGE GROUPBOX
         self.imageFileBrowsePushButton.clicked.connect(self.choose_image_file)
+        self.imageFileLineEdit.editingFinished.connect(self.try_to_load_image)
 
         ## THRESHOLD GROUPBOX
         # we hide for now the threshold options, might like them later
@@ -92,10 +93,17 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
             fileName = dialog.selectedFiles()[0]
             debug(f'choose_image_file: Dialog-selected file name: {fileName}')
             self.imageFileLineEdit.setText(fileName)
-            
-            if self.plotWidget.load_image(filepath=fileName):
-                self.displayStackedWidget.setCurrentIndex(1)
-                self.analysisTabs.setTabEnabled(1, True)
+
+            self.try_to_load_image()
+
+    def try_to_load_image(self):
+        fileName:str = self.imageFileLineEdit.text()
+        if self.plotWidget.load_image(filepath=fileName):
+            self.displayStackedWidget.setCurrentIndex(1)
+            self.analysisTabs.setTabEnabled(1, True)
+        else:
+            self.displayStackedWidget.setCurrentIndex(0)
+            self.analysisTabs.setTabEnabled(1, False)
 
     ### WORK ON IMAGE
 
