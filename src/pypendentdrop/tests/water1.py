@@ -51,8 +51,8 @@ if __name__ == "__main__":
 
     threshold = args.t
     if threshold is None:
-        ppd.logger.debug('Threshold not provided, using best_threshold to provide it.')
-        threshold = ppd.best_threshold(img, roi=roi)
+        ppd.logger.debug('Threshold not provided, using auto_threshold to provide it.')
+        threshold = ppd.auto_threshold(img, roi=roi)
 
     ppd.logger.debug(f'Threshold level: {threshold}')
 

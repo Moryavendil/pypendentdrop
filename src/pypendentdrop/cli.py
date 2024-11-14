@@ -72,8 +72,8 @@ def main():
 
     threshold = args.t
     if threshold is None:
-        logger.debug('Threshold not provided, using best_threshold to provide it.')
-        threshold = best_threshold(img, roi=roi)
+        logger.debug('Threshold not provided, using auto_threshold to provide it.')
+        threshold = auto_threshold(img, roi=roi)
 
     logger.debug(f'Threshold level: {threshold}')
 

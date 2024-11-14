@@ -15,7 +15,7 @@ if not import_successful:
     raise FileNotFoundError(f'Could not import image at {filepath}')
 
 # 2. Choose a threshold (here automatically)
-threshold = ppd.best_threshold(image, roi=roi)
+threshold = ppd.auto_threshold(image, roi=roi)
 
 # 3. Detect the contour
 contour = ppd.detect_main_contour(image, threshold, roi=roi)

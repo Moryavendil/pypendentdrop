@@ -142,7 +142,7 @@ class ppd_mainwindow(QMainWindow, Ui_PPD_MainWindow):
         if autoThreshold is None:
             autoThreshold = self.autoThresholdCheckBox.isChecked()
         if autoThreshold:
-            threshold = best_threshold(self.plotWidget.iso.data, self.plotWidget.iso.roi)
+            threshold = auto_threshold(self.plotWidget.iso.data, self.plotWidget.iso.roi)
             self.customThresholdSpinBox.setValue(threshold)
         self.thresholdChanged()
 

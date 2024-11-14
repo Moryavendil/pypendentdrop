@@ -10,7 +10,7 @@ The main steps of measuring the surface tension of a liquid via PyPendentDrop ar
 
     *Optionally:* Specify the Region Of Interest in your image
 
-2. Choose a threshold for your image (or use ``ppd.best_threshold(image)`` to find it for you)
+2. Choose a threshold for your image (or use ``ppd.auto_threshold(image)`` to find it for you)
 
 3. Detect the contour of the drop using ``ppd.detect_main_contour(image, threshold)``
 

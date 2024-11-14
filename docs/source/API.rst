@@ -26,10 +26,10 @@ Contour detection
 
 The detection of a drop contour is made by
 
-1. Selecting a threshold value for the luminosity (manually or using :func:`best_threshold <pypendentdrop.best_threshold>`), and
-2. Finding the main contour (the one of the drop) using :func:`detect_main_contour <pypendentdrop.best_threshold>`.
+1. Selecting a threshold value for the luminosity (manually or using :func:`auto_threshold <pypendentdrop.auto_threshold>`), and
+2. Finding the main contour (the one of the drop) using :func:`detect_main_contour <pypendentdrop.detect_main_contour>`.
 
-.. autofunction:: pypendentdrop.best_threshold
+.. autofunction:: pypendentdrop.auto_threshold
 
 .. autofunction:: pypendentdrop.detect_main_contour
 
