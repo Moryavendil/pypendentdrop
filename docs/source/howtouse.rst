@@ -61,10 +61,10 @@ or
 
 Use the ``-h`` option to list the available options. You need to have ``matplotlib`` installed to use the ``-o`` option (graph generation).
 
-PyPendentGraph API
+PyPendentDrop API
 ~~~~~~~~~~~~~~~~~~~~
 
-Of course, you can use all the functions provided by the PyPendentGraph library in a custom Python script, if you wish to do the analysis in your own style (different contour selection, optimization method...) or integrate PyPendentDrop in another application. In the import section of your program, simply import the library using
+Of course, you can use all the functions provided by the PyPendentDrop library in a custom Python script, if you wish to do the analysis in your own style (different contour selection, optimization method...) or integrate PyPendentDrop in another application. In the import section of your program, simply import the library using
 
 .. code-block:: python
 

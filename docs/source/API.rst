@@ -48,7 +48,7 @@ All the drops parameters are handled using a Parameter object. An automatic esti
    :members:
 
 ..    comment
-    .. automethod:: describe
+    .. automethod:: describe_acquisition
     .. automethod:: get_bond
 
 Parameters optimization
