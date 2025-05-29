@@ -315,10 +315,10 @@ def estimate_parameters(image:np.ndarray, contour:np.ndarray, px_per_mm) -> Para
         # we do a trick to have the angle between -90 and 90 deg
         gravity_angle = (np.pi/2 + np.arctan2(-a, b))%(np.pi) - np.pi/2
 
-        if np.abs(gravity_angle*180/np.pi) > 60:
+        if (np.abs(gravity_angle*180/np.pi) > 15) and (np.abs(gravity_angle*180/np.pi) < 75):
             warning(f'WARN: the angle of gravity was detected to {round(gravity_angle*180/np.pi, 2)} deg.')
-            warning(f'WARN: This is likely an error so I put it to 0.')
-            gravity_angle = 0
+            warning(f'WARN: This is likely an error so I put it back to {gravity_angle}.')
+            # gravity_angle = 0
     except:
         warning(f"WARN: couldn't get gravity angle. Falling back to {gravity_angle}")
 
