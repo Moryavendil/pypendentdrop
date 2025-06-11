@@ -10,8 +10,8 @@ from .. import logfacility
 
 def main():
     parser = argparse.ArgumentParser(
-        prog='ppd_commandLine',
-        description='PyPendentDrop - GUI line version',
+        prog='ppd_GUI',
+        description='PyPendentDrop - GUI version',
         epilog=f'', add_help=True)
     parser.add_argument('-v', help='Verbosity (-v: info, -vv: logger.debug, -vvv: trace)', action="count", default=0)
 
