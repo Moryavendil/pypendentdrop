@@ -70,12 +70,23 @@ class Parameters():
 
     ###### PIXEL SPACING / SIZE / DENSITY
     def get_px_density(self) -> float:
-        """Get the density of pixels, in px/mm. Use ``set_px_density`` to set it."""
+        """Get the density of pixels, in px/mm. Use ``set_px_density`` to set it.
+        
+        The pixel density corresponds to the quantity of pixels per unit length in your image.
+        For example, if in your image 5 pixels span a length corresponding to 2 mm, the pixel density is 5/2=2.5 pixel per millimeter.
+        
+        The higher the pixel density, the more zoomed the image is, and in general the better the measurement. 
+        A typical pixel density of 100 or higher is recommended for an optimal measurement.
+        """
         return self._px_per_mm
     def set_px_density(self, pixel_density:float) -> None:
         self._px_per_mm = pixel_density
     def get_px_spacing(self) -> float:
-        """Get the spacing between pixels, in mm. Use ``set_px_spacing`` to set it."""
+        """Get the spacing between pixels, in mm. Use ``set_px_spacing`` to set it.
+        
+        The pixel spacing is to the physical distance corresponding to the space between two adjacent pixels in your image.
+        For example, if in your image 5 pixels span a length corresponding to 2 mm, the pixel spacing is 2/5=0.4 millimeter per pixel.
+        """
         return None if ((self._px_per_mm or 0) == 0) else 1/self._px_per_mm
     def set_px_spacing(self, pixel_spacing:float) -> None:
         self._px_per_mm = None if ((pixel_spacing or 0) == 0) else 1/pixel_spacing
