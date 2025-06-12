@@ -4,7 +4,8 @@ import pypendentdrop as ppd
 
 # the path to the image file
 filepath = './src/pypendentdrop/tests/testdata/water_2.tif'
-# The Region Of Interest: roi = [TLx, TLy, BRx, BRy]
+# The Region Of Interest: position of Top Left (TL) and Bottom Right (BR) corners of the ROI
+# roi = [TLx, TLy, BRx, BRy]
 # Use roi = None or roi = [None, None, None, None] if you do not care
 roi = [10, 90, 300, 335]
 
@@ -42,9 +43,11 @@ if optimization_successful:
     # Print the bond number corresponding to the drop
     print(f'Bond number: {round(optimized_parameters.get_bond(), 3)}')
 
-    # The density contrast
-    rhog = 9.812
-    optimized_parameters.set_densitycontrast(rhog)
+    # The density contrast and gravity
+    deltarho = 1.00
+    g = 9.81
+    optimized_parameters.set_densitycontrast(deltarho)
+    optimized_parameters.set_gravityacc(g)
 
     # 7. Compute the surface tension
     print(f'Surface tension gamma: {round(optimized_parameters.get_surface_tension_mN(), 3)} mN/m')
