@@ -36,8 +36,8 @@ class Parameters():
         self._l_px: Optional[float] = None
 
         self._px_per_mm: Optional[float] = None
-        self._d: Optional[float] = None # delta rho in kg/l
-        self._g: Optional[float] = None # g in m/s2
+        self._d: Optional[float] = 1.00 # delta rho in kg/l
+        self._g: Optional[float] = 9.81 # g in m/s2
 
     def __repr__(self) -> str:
         return f""" 
