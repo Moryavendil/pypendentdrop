@@ -35,7 +35,7 @@ The detection of a drop contour is made by
 
 .. autofunction:: pypendentdrop.detect_contourlines
 
-Parameters estimation
+The drop parameters
 -----------------------
 
 One has to provide a reasonable estimation of the parameters describing the drop (angle of gravity, tip position, apex radius of curvature, capillary length) as initial condition for the optimization to converge to a relevant minimum in the parameters space.
@@ -51,7 +51,7 @@ All the drops parameters are handled using a Parameter object. An automatic esti
     .. automethod:: describe_acquisition
     .. automethod:: get_bond
 
-Parameters optimization
+Optimization
 ------------------------
 
 Using :func:`optimize_profile <pypendentdrop.optimize_profile>`, one can find the parameters that fits best a given detected contour (in pixel coordinates). The contour is numerically integrated using :func:`compute_nondimensional_profile <pypendentdrop.compute_nondimensional_profile>`, and compared with the detected profile using :func:`compute_gap_dimensionless <pypendentdrop.compute_gap_dimensionless>`. The parameters are then varied to minimize the dimensionless total area of the gap between the two. This area between them can be computed in real-world units (squared pixels) using :func:`compute_gap_pixel <pypendentdrop.compute_gap_pixel>`. In order to plot the theoretical profile, :func:`integrated_contour <integrated_contour.integrated_contour>` allows one to obtain the contour integrated from the equations in pixel coordinates.
