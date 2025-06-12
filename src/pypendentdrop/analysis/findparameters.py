@@ -157,9 +157,26 @@ class Parameters():
 
     ### TIP RADIUS OF CURVATURE LONG VERSION
     def get_tipradius_px(self) -> float:
-        """Get the radius of curvature at the tip, in pixels. Use ``set_tipradius_px`` to set it."""
+        """
+        Returns the radius of curvature at the tip of the drop, in pixels.
+
+        Use :meth:`describe <pypendentdrop.Parameters.set_tipradius_px>` to set this value manually.
+
+        Returns
+        -------
+        r0_px : float
+            The tip radius, in pixels.
+        """
         return self._r_px
     def set_tipradius_px(self, r0_px:float) -> None:
+        """
+        Manually sets the radius of curvature at the tip of the drop, in pixels.
+
+        Parameters
+        ----------
+        r0_px : float
+            The tip radius, in pixels.
+        """
         self._r_px = r0_px
     def get_tipradius_mm(self) -> float:
         """Get the radius of curvature at the tip, in millimeters. Use ``set_tipradius_mm`` to set it."""
@@ -179,27 +196,77 @@ class Parameters():
 
     ### CAPILLARY LENGTH LONG VERSION
     def get_caplength_mm(self) -> float:
-        """Get the capillary length, in millimeters. Use ``set_caplength_mm`` to set it."""
+        """
+        Returns the capillary length, in millimeters.
+
+        Use :meth:`describe <pypendentdrop.Parameters.set_caplength_mm>` to set this value manually.
+
+        Returns
+        -------
+        lcap_mm : float
+            The capillary length, in millimeters.
+        """
         return self.get_l_mm()
     def set_caplength_mm(self, lcap_mm:float):
+        """
+        Manually sets the capillary length, in millimeters.
+
+        Parameters
+        ----------
+        lcap_mm : float
+            The capillary length, in millimeters.
+        """
         self.set_l_mm(lcap_mm=lcap_mm)
     def get_caplength_px(self) -> float:
-        """Get the capillary length, in pixels. Use ``set_caplength_px`` to set it."""
+        """
+        Returns the capillary length, in pixels.
+
+        Use :meth:`describe <pypendentdrop.Parameters.set_caplength_px>` to set this value manually.
+
+        Returns
+        -------
+        lcap_px : float
+            The capillary length, in pixels.
+        """
         return self.get_l_px()
     def set_caplength_px(self, lcap_px:float) -> None:
+        """
+        Manually sets the capillary length, in pixels.
+
+        Parameters
+        ----------
+        lcap_px : float
+            The capillary length, in pixels.
+        """
         self.set_l_px(lcap_px=lcap_px)
 
     ### GRAVITY ACCELERATION SHORT VERSION
-    def set_g(self, gravacc_ms2:Optional[float]) -> None:
-        self._g = gravacc_ms2
+    def set_g(self, g:Optional[float]) -> None:
+        self._g = g
     def get_g(self):
         return self._g
 
     ### GRAVITY ACCELERATION LONG VERSION
-    def set_gravityacc(self, gravacc_ms2:Optional[float]) -> None:
-        self._g = gravacc_ms2
+    def set_gravityacc(self, g:Optional[float]) -> None:
+        """Sets the value for the acceleration of gravity for this experiment.
+
+        Parameters
+        ----------
+        g : float
+            The acceleration of gravity, in m/s^2
+        """
+        self._g = g
     def get_gravityacc(self):
-        """Get the acceleration of gravity, in m/s^2 (typically 9.81). Use ``set_gravityacc`` to set it."""
+        """Returns the acceleration of gravity for this experiment.
+
+        Use :meth:`describe <pypendentdrop.Parameters.set_gravityacc>` to modify this value.
+
+        Returns
+        -------
+        g : float
+            The acceleration of gravity, in m/s^2.
+            The default value is 9.81.
+        """
         return self._g
 
     ### DENSITY CONTRAST SHORT VERSION
