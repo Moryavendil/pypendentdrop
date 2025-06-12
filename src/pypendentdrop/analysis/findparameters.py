@@ -21,7 +21,7 @@ class Parameters():
 
     Use :meth:`describe <pypendentdrop.Parameters.describe>` to print the values of the parameters.
 
-    This class has no public attributes, you should use the (numerous) getter and setter methods to manipulate the variables.
+    *This class has no public attributes, you should use the (numerous) getter and setter methods to manipulate the variables.*
 
     This class has str and repr methods #todo add exemples of what this means here.
     """
@@ -103,14 +103,16 @@ class Parameters():
 
     ### ANGLE OF GRAVITY LONG VERSION
     def get_angleofgravity_rad(self) -> float:
-        """Get the angle of gravity, in radians. Use ``set_angleofgravity_rad`` to set it."""
+        """Returns the current angle of gravity, in radians. Use ``set_angleofgravity_rad`` to set it manually."""
         return self._a_rad
     def set_angleofgravity_rad(self, gravity_angle_rad:float) -> None:
+        """Manually sets the angle of gravity, in radians, to the given value."""
         self._a_rad = gravity_angle_rad
     def get_angleofgravity_deg(self) -> float:
-        """Get the angle of gravity, in degrees. Use ``set_angleofgravity_deg`` to set it."""
+        """Returns the current angle of gravity, in degrees. Use ``set_angleofgravity_deg`` to set it manually."""
         return None if self._a_rad is None else self._a_rad * self.DEG_PER_RAD
     def set_angleofgravity_deg(self, gravity_angle_deg:float) -> None:
+        """Manually sets the angle of gravity, in degrees, to the given value."""
         self._a_rad = None if gravity_angle_deg is None else gravity_angle_deg * self.RAD_PER_DEG
 
     ###### TIP POSITION SHORT VERSION
