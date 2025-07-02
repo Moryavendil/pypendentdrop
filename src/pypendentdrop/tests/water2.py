@@ -122,12 +122,12 @@ if __name__ == "__main__":
         import matplotlib
         matplotlib.use('Qt5Agg')
         import matplotlib.pyplot as plt
-        from .. import plot
+        from .. import ppdplot
 
-        plot.generate_figure(img, cnt, initial_parameters,
+        ppdplot.generate_figure(img, cnt, initial_parameters,
                              prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
         if opti_success:
-            plot.generate_figure(img, cnt, opti_params,
+            ppdplot.generate_figure(img, cnt, opti_params,
                                  prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
         plt.show()
 

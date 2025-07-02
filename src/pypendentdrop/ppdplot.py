@@ -20,16 +20,38 @@ plt.rcParams.update({'font.family': 'serif', 'font.size': 10,
                      'axes.labelsize': 10,'axes.titlesize': 12,
                      'legend.fontsize': 10})
 
+from analysis.getcontour import format_roi
+def plot_roi(ax, image:np.ndarray, roi=None, **kwargs):
+    tlx, tly, brx, bry = format_roi(image, roi)
+    if kwargs.get('color', None) is None:
+        kwargs['color'] = 'y'
+    if kwargs.get('lw', None) is None and kwargs.get('linewidth', None) is None:
+        kwargs['lw'] = 2
+    if kwargs.get('ls', None) is None and kwargs.get('linestyle', None) is None:
+        kwargs['ls'] = 2
+    if kwargs.get('label', None) is None:
+        kwargs['label'] = 'ROI'
+    ax.plot([tlx, tlx, brx, brx, brx], [tly, bry, bry, tly, tly], **kwargs)
+
+def plot_contour(ax, contour, **kwargs):
+    xcontour, ycontour = contour[0], contour[1]
+    if kwargs.get('lw', None) is None and kwargs.get('linewidth', None) is None:
+        kwargs['lw'] = 1.5
+    if kwargs.get('ls', None) is None and kwargs.get('linestyle', None) is None:
+        kwargs['ls'] = '-'
+    if kwargs.get('label', None) is None:
+        kwargs['label'] = 'Contour'
+    ax.plot(xcontour, ycontour, **kwargs)
+
 def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, parameters:Parameters, comment='', roi=None):
     roi = format_roi(image, roi)
     roi[2] = roi[2] or image.shape[1]
     roi[3] = roi[3] or image.shape[0]
     ax.set_title(f'Drop image and contour ({comment})')
     ax.imshow(image, cmap='gray')
-    ax.plot([roi[0], roi[0], roi[2], roi[2], roi[0]], [roi[1], roi[3], roi[3], roi[1], roi[1]], lw=2, c='y', ls=':', label='ROI')
+    plot_roi(ax, image, roi)
 
-    xcontour, ycontour = contour[0], contour[1]
-    ax.plot(xcontour, ycontour, c='lime', lw=2, label='Detected contour')
+    plot_contour(ax, contour, color='lime', label='Detected contour')
 
     gravity_angle = parameters.get_a_rad()
     x_tip_position, y_tip_position = parameters.get_xy_px()
@@ -49,9 +71,9 @@ def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, parameters:Para
                      linewidth=2, fill=False, zorder=2, color='darkred', ls='--', label=f'Curvature')
     ax.add_patch(e1)
 
-    Rd, Zd = integrated_contour(parameters)
+    contour_integrated = integrated_contour(parameters)
 
-    ax.plot(Rd, Zd, c='r', lw=2, label=f'Computed profile')
+    plot_contour(ax, contour_integrated, color='r', label='Computed profile')
 
     ax.legend()
     ax.set_xlabel('x [px]')

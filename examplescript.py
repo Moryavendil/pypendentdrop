@@ -55,16 +55,16 @@ else:
     print('Optimization failed :(')
 
 import matplotlib.pyplot as plt
-from pypendentdrop import plot
+from pypendentdrop import ppdplot
 
 if not optimization_successful:
     fig, (ax1, ax1) = plt.subplots(1, 1)
-    plot.plot_image_contour(ax1, image, contour, estimated_parameters, 'estimated', roi=roi)
+    ppdplot.plot_image_contour(ax1, image, contour, estimated_parameters, 'estimated', roi=roi)
     plt.savefig('deleteme_estimatedparameters.png', dpi=300)
 else:
     ### Plotting a comparison between the estimated and optimized parameters
 
     fig, (ax1, ax2) = plt.subplots(1, 2)
-    plot.plot_image_contour(ax1, image, contour, estimated_parameters, 'estimated', roi=roi)
-    plot.plot_image_contour(ax2, image, contour, optimized_parameters, 'optimized', roi=roi)
+    ppdplot.plot_image_contour(ax1, image, contour, estimated_parameters, 'estimated', roi=roi)
+    ppdplot.plot_image_contour(ax2, image, contour, optimized_parameters, 'optimized', roi=roi)
     plt.savefig('deleteme_comparison.png', dpi=300)

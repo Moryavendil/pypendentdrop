@@ -110,9 +110,9 @@ def main():
 
 
     if args.o is not None:
-        from . import plot
+        from . import ppdplot
 
-        plot.generate_figure(img, cnt, parameters=initial_parameters,
+        ppdplot.generate_figure(img, cnt, parameters=initial_parameters,
                              prefix=args.o, comment='estimated parameters', suffix='_initialestimate', filetype='pdf', roi=roi)
     else:
         pass
@@ -172,8 +172,8 @@ def main():
 
         if args.o is not None:
             try:
-                from . import plot
-                plot.generate_figure(img, cnt, parameters=opti_params,
+                from . import ppdplot
+                ppdplot.generate_figure(img, cnt, parameters=opti_params,
                                      prefix=args.o, comment='optimized parameters', suffix='_optimalestimate', filetype='pdf', roi=roi)
             except ImportError:
                 raise ImportError("Using the `-o` option requires matplotlib; which could not be imported (try `pip install matplotlib`).")
