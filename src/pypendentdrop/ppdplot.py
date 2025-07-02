@@ -29,7 +29,7 @@ def plot_roi(ax, image:np.ndarray, roi=None, **kwargs):
     if kwargs.get('lw', None) is None and kwargs.get('linewidth', None) is None:
         kwargs['lw'] = 2
     if kwargs.get('ls', None) is None and kwargs.get('linestyle', None) is None:
-        kwargs['ls'] = 2
+        kwargs['ls'] = '--'
     if kwargs.get('label', None) is None:
         kwargs['label'] = 'ROI'
     ax.plot([tlx, tlx, brx, brx, brx], [tly, bry, bry, tly, tly], **kwargs)
