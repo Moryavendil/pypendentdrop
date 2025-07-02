@@ -20,7 +20,7 @@ plt.rcParams.update({'font.family': 'serif', 'font.size': 10,
                      'axes.labelsize': 10,'axes.titlesize': 12,
                      'legend.fontsize': 10})
 
-from analysis.getcontour import format_roi
+from .analysis.getcontour import format_roi
 
 def plot_roi(ax, image:np.ndarray, roi=None, **kwargs):
     tlx, tly, brx, bry = format_roi(image, roi)
