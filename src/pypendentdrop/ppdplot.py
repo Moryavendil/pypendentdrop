@@ -47,7 +47,7 @@ def plot_contour(ax, contour, **kwargs):
 def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, parameters:Parameters, comment='', roi=None):
     roi = format_roi(image, roi)
     ax.set_title(f'Drop image and contour ({comment})')
-    ax.imshow(image, cmap='gray', aspect='auto')
+    ax.imshow(image, cmap='gray', aspect='equal')
     plot_roi(ax, image, roi)
 
     plot_contour(ax, contour, color='lime', label='Detected contour')
