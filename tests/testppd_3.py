@@ -6,7 +6,7 @@ from pypendentdrop import logfacility
 from pypendentdrop.ppd_parse import generate_parser
 from pypendentdrop import ppdplot
 
-testdata_filepath = 'src/pypendentdrop/tests/testdata/water_2_rotated.tif'
+testdata_filepath = 'tests/testdata/water_2_rotated.tif'
 testdata_pxldensity = 57.0
 testdata_g = 9.81
 testdata_d = 1.00

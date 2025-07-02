@@ -3,11 +3,12 @@
 import pypendentdrop as ppd
 
 # the path to the image file
-filepath = './src/pypendentdrop/tests/testdata/water_2.tif'
+filepath = './tests/testdata/water_2.tif'
 # The Region Of Interest: position of Top Left (TL) and Bottom Right (BR) corners of the ROI
 # roi = [TLx, TLy, BRx, BRy]
 # Use roi = None or roi = [None, None, None, None] if you do not care
-roi = [10, 90, 300, 335]
+roi = [10, 90, 300, 335] # This is reasonable for the file water_2.tif
+roi = None # this also works but is not recommended
 
 # 1. Import the image
 import_successful, image = ppd.import_image(filepath)
@@ -54,8 +55,9 @@ if optimization_successful:
 else:
     print('Optimization failed :(')
 
+# Let's plot some stuff
 import matplotlib.pyplot as plt
-from pypendentdrop import ppdplot
+from pypendentdrop import ppdplot # a small subpackage to help at plotting
 
 if not optimization_successful:
     fig, (ax1, ax1) = plt.subplots(1, 1)
