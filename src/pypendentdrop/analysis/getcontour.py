@@ -169,7 +169,7 @@ def threshold_otsu(image:np.ndarray) -> float:
         return float(image[0,0])
     counts, bin_edges = np.histogram(image.ravel(), bins=np.arange(image.min()-0.5, image.max()+.5+1, 1))
     bin_centers:np.ndarray = (bin_edges[1:] + bin_edges[:-1]) / 2
-    trace(f'bin centers: {bin_centers}')
+    # trace(f'bin centers: {bin_centers}') # a bit too much lol
 
     # class probabilities for all possible thresholds
     weight1 = np.cumsum(counts)
