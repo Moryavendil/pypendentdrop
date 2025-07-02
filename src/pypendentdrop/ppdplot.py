@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 from scipy.integrate import trapezoid
 
-plt.rcParams["figure.figsize"] = (12, 8)
+plt.rcParams["figure.figsize"] = (8, 6)
 plt.rcParams["figure.max_open_warning"] = 50
 
 # plt.rcParams['pgf.texsystem'] = 'pdflatex' # use this if you have LaTeX
@@ -21,6 +21,7 @@ plt.rcParams.update({'font.family': 'serif', 'font.size': 10,
                      'legend.fontsize': 10})
 
 from analysis.getcontour import format_roi
+
 def plot_roi(ax, image:np.ndarray, roi=None, **kwargs):
     tlx, tly, brx, bry = format_roi(image, roi)
     if kwargs.get('color', None) is None:
@@ -45,10 +46,8 @@ def plot_contour(ax, contour, **kwargs):
 
 def plot_image_contour(ax, image:np.ndarray, contour:np.ndarray, parameters:Parameters, comment='', roi=None):
     roi = format_roi(image, roi)
-    roi[2] = roi[2] or image.shape[1]
-    roi[3] = roi[3] or image.shape[0]
     ax.set_title(f'Drop image and contour ({comment})')
-    ax.imshow(image, cmap='gray')
+    ax.imshow(image, cmap='gray', aspect='auto')
     plot_roi(ax, image, roi)
 
     plot_contour(ax, contour, color='lime', label='Detected contour')
