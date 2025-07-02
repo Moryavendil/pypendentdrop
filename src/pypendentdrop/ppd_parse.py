@@ -3,7 +3,7 @@ import argparse
 def generate_parser(program_name:str=None):
     program_name = program_name or ""
     parser = argparse.ArgumentParser(
-        prog='ppd-cli',
+        prog=program_name,
         description=f'PyPendentDrop - {program_name}',
         epilog=f'', add_help=True)
     parser.add_argument('-n', metavar='FILENAME', help='filename', type=argparse.FileType('rb'))
